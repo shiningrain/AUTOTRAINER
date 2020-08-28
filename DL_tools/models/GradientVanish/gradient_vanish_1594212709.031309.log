@@ -1,0 +1,3 @@
+solution,times,effect,issue_list,train_result,describe
+relu,0,part,['not_converge'],0.5099999904632568,
+bn,0,part,['vanish'],0.6442857384681702,

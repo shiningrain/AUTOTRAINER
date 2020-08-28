@@ -1,0 +1,2 @@
+solution,times,effect,issue_list,train_result,describe
+relu,0,part,['vanish', 'relu'],0.5628571510314941,No

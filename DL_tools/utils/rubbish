@@ -1,0 +1,67 @@
+'''
+if tmp_sol=='gradient':#exp
+    #if issue_type=='explode':
+    tmp_model=self.model
+    config=self.train_config
+    kwargs_list=random_kwargs_list(method='gradient_clip')
+    config['opt']=rp.modify_optimizer(config['opt'],kwargs_list,method='gradient')
+if tmp_sol=='relu':#all
+    tmp_model=rp.modify_activations(self.model,'relu')
+    #tmp_model=rp.modify_activations(self.model,relu)
+    #because of the nan weight, in this step ,the weight of the last layer may still be nan even we changed the activations in the previous layers
+    # this may lead to nan loss after repair. **reload the model will avoid this**.
+    config=self.train_config
+if tmp_sol=='bn':#all
+    tmp_model=rp.BN_network(self.model,incert_layer='dense')
+    config=self.train_config
+if tmp_sol=='initial':#exp
+    good_initializer=['he_uniform','lecun_uniform','glorot_normal','glorot_uniform','he_normal','lecun_normal']
+    #no clear strategy now
+    init_1=np.random.choice(good_initializer,1)[0]
+    init_2=np.random.choice(good_initializer,1)[0]
+    tmp_model=rp.modify_initializer(self.model,init_1,init_2)
+    config=self.train_config
+if tmp_sol=='selu':#exp
+    tmp_model=rp.modify_activations(self.model,'selu')
+    tmp_model=rp.modify_initializer(self.model,'lecun_uniform','lecun_uniform')
+    #selu usually use the lecun initializer
+    config=self.train_config
+if tmp_sol=='leaky':#exp
+    tmp_model=rp.modify_activations(self.model,'LeakyReLU',method='special')
+    config=self.train_config
+if tmp_sol=='adam':#unstable
+    tmp_model=self.model
+    config=self.train_config
+    config['opt']='Adam'
+if tmp_sol=='lr':#unstable
+    # can consider to increase or decrease the lr for different situation
+    tmp_model=self.model
+    config=self.train_config
+    tmp_list=[0.01,0.001,0.1,0.0001]
+    kwargs_list.append(tmp_list[j])
+    config['opt']=rp.modify_optimizer(config['opt'],kwargs_list,method='lr')
+if tmp_sol=='ReduceLR':#unstable
+    tmp_model=self.model
+    config=self.train_config
+    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
+                patience=5, min_lr=0.001)
+    config['callbacks'].append(reduce_lr)
+if tmp_sol=='momentum':#unstable
+    tmp_model=self.model
+    config=self.train_config
+    kwargs_list=random_kwargs_list(method='momentum')
+    config['opt']=rp.modify_optimizer('SGD',kwargs_list,method='momentum')
+if tmp_sol=='batch':#unstable
+    tmp_model=self.model
+    config=self.train_config
+    #a=[2,4,8,16]
+    config['batch_size']=(2**(j+1))*config['batch_size']
+if tmp_sol=='GN':#unstable
+    tmp_model=rp.Gaussion_Noise(self.model)
+    config=self.train_config
+if tmp_sol=='optimizer':#not_converge, use default set of different optimizer.
+    optimizer_list=['SGD','Adam','Nadam','Adamax','RMSprop']
+    tmp_opt=np.random.choice(optimizer_list,1)[0]
+    optimizer_list.remove(tmp_opt)
+    config['opt']=tmp_opt
+'''

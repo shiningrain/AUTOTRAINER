@@ -1,0 +1,4 @@
+solution,times,effect,issue_list,train_result,describe
+lr,0,no,['unstable'],0.831428587436676,
+lr,1,no,['unstable'],0.8799999952316284,
+lr,2,no,['unstable'],0.8714285492897034,
