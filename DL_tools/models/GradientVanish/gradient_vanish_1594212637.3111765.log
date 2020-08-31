@@ -1,3 +1,0 @@
-solution,times,effect,issue_list,train_result,describe
-relu,0,no,['vanish', 'relu'],0.7314285635948181,
-bn,0,part,['unstable'],0.5899999737739563,

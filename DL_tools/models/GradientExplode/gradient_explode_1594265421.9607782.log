@@ -1,2 +1,0 @@
-solution,times,effect,issue_list,train_result,describe
-relu,0,no,['vanish', 'explode'],0.5471428632736206,

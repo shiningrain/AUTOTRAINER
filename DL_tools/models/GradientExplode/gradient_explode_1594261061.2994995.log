@@ -1,3 +1,0 @@
-solution,times,effect,issue_list,train_result,describe
-relu,0,part,['not_converge'],0.5257142782211304,
-bn,0,no,['explode', 'unstable'],0.822857141494751,

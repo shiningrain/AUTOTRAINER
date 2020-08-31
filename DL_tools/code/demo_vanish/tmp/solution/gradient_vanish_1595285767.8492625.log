@@ -1,2 +1,0 @@
-solution,times,issue_list,train_result,describe
-selu,0,[],0.5866666436195374,Using 'SeLU' activation in each layers' activations; Use 'lecun_uniform' as the kernel initializer.

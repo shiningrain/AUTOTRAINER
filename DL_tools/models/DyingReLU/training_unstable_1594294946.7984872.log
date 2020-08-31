@@ -1,6 +1,0 @@
-solution,times,effect,issue_list,train_result,describe
-momentum,0,no,['unstable'],0.8571428656578064,
-momentum,1,no,['unstable'],0.854285717010498,
-momentum,2,no,['unstable'],0.8500000238418579,
-batch,0,no,['unstable'],0.8557142615318298,
-batch,1,solved,[],0.8557142615318298,

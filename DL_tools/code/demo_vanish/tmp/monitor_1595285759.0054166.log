@@ -1,8 +1,0 @@
-checktype,current_epoch,issue_list,time_usage,Describe.log
-epoch,0,[],2.1695380210876465,No Issue now
-epoch,5,[],3.2342934608459473,No Issue now
-epoch,10,[],3.8747100830078125,No Issue now
-epoch,15,[],4.523994207382202,No Issue now
-epoch,20,[],5.125837564468384,No Issue now
-epoch,25,[],5.698770523071289,No Issue now
-epoch,30,['vanish'],5.945779323577881,Found Issue Stop Training! Starting the repair procedure.
