@@ -1,0 +1,22 @@
+checktype,current_epoch,issue_list,time_usage,Describe
+epoch,0,[],1.43782377243042,No Issue now
+epoch,3,[],3.9169530868530273,No Issue now
+epoch,6,[],6.277107238769531,No Issue now
+epoch,9,[],8.550353765487671,No Issue now
+epoch,12,[],10.843002796173096,No Issue now
+epoch,15,[],13.166401863098145,No Issue now
+epoch,18,[],15.610567569732666,No Issue now
+epoch,21,[],18.11310076713562,No Issue now
+epoch,24,[],20.528406620025635,No Issue now
+epoch,27,[],22.954472541809082,No Issue now
+epoch,30,[],25.406069040298462,No Issue now
+epoch,33,[],27.622719049453735,No Issue now
+epoch,36,[],29.94076180458069,No Issue now
+epoch,39,[],32.1650390625,No Issue now
+epoch,42,[],34.39932632446289,No Issue now
+epoch,45,[],36.60732674598694,No Issue now
+epoch,48,[],38.973748445510864,No Issue now
+epoch,51,[],41.413851261138916,No Issue now
+epoch,54,[],43.856996059417725,No Issue now
+epoch,57,[],46.174139976501465,No Issue now
+epoch,60,['unstable'],48.79542422294617,Found Issue Stop Training! Starting the repair procedure.
