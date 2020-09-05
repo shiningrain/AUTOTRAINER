@@ -29,7 +29,7 @@ import keras.layers as L
 import keras.activations as A
 import keras.initializers as I
 
-tmp_model_path='/data/zxy/DL_tools/DL_tools/models'
+tmp_model_path='./tmp_models'
 Insert_Layers=['dense','lstm','conv']
 
 def has_NaN(output):
@@ -38,6 +38,9 @@ def has_NaN(output):
     return result
 
 def reload_model(model,path=tmp_model_path):
+    path=os.path.abspath(path)
+    if not os.path.exists(path):
+        os.makedirs(path)
     model_name='model_{}.h5'.format(str(os.getpid()))
     path=os.path.join(path,model_name)
     model.save(path)
@@ -92,21 +95,6 @@ def replace_intermediate_layer_in_keras(model, layer_id, new_layer):
             x = layers[i](x)
     new_model = Model(input=layers[0].input, output=x)
     return new_model
-    '''
-def DNN_skip_connect_pre(model,layer_name='dense'):
-    layers = [l for l in model.layers]
-    x = layers[0].output
-    for i in range(1,len(layers)):
-        if layer_name in  model.layers[i].get_config()['name'] and 'activation' in model.layers[i].get_config() and layers[i].get_config()['activation']=='relu':
-            layers[i].activation=linear
-            x = layers[i](x)
-            layer_name='new_activation_'+str(i)
-            x = Activation('relu',name=layer_name)(x)
-        else:
-            x = layers[i](x)
-    new_model = Model(input=layers[0].input, output=x)
-    return new_model
-'''
 
 def modify_initializer(model,b_initializer=None,k_initializer=None):
     layers_num = len(model.layers)
@@ -314,10 +302,6 @@ def modify_optimizer(optimizer,kwargs_list,method='lr'):
         new_opt=optimizer.__class__(**kwargs)
     elif method=='momentum':
         new_opt=SGD(momentum=kwargs_list[0])
-        '''elif method=='opt':
-            # use a new optimizer, kwargs list contains a optimizer name and a kwargs list now.
-            opt_cls = getattr(O, kwargs_list[0])
-            new_opt = opt_cls(**kwargs_list[-1])'''
     elif method=='gradient':
         # add gradient clip or gradient norm, kwargs list contains a optimizer name and its kwargs now.
         kwargs=optimizer.get_config()
@@ -332,16 +316,16 @@ def repair_strategy(method='balance'):
         gradient_vanish_strategy=['selu_1','relu_1','bn_1']#'selu_1',
         gradient_explode_strategy=['selu_1','relu_1','gradient_2','tanh_1','bn_1']#
         dying_relu_strategy=['selu_1','bn_1','initial_3','leaky_3']#
-        unstable_strategy=['adam_1','lr_3','ReduceLR_1','batch_3','momentum_3','GN_1']#
-        not_converge_strategy=['optimizer_3','lr_3']
+        unstable_strategy=['adam_1','lr_3','ReduceLR_1','batch_4','momentum_3','GN_1','initial_3']#
+        not_converge_strategy=['optimizer_3','lr_3','initial_3']
         over_fitting_strategy=['regular_1','estop_1','dropout_1','GN_1']#
     elif method=='structure':
         #first order: complexity; seconde order: efficiency.
         gradient_vanish_strategy=['relu_1','selu_1','bn_1']
         gradient_explode_strategy=['gradient_2','relu_1','selu_1','tanh_1','bn_1']#1 ,
         dying_relu_strategy=['selu_1','initial_3','leaky_3','bn_1']#
-        unstable_strategy=['adam_1','lr_3','ReduceLR_1','batch_3','momentum_3','GN_1']#
-        not_converge_strategy=['optimizer_3','lr_3']
+        unstable_strategy=['adam_1','lr_3','ReduceLR_1','batch_4','momentum_3','GN_1','initial_3']#
+        not_converge_strategy=['optimizer_3','lr_3','initial_3']
         over_fitting_strategy=['estop_1','regular_1','dropout_1','GN_1']
         # over_fitting_strategy=['regular_1','dropout_1','GN_1']
     elif method=='efficiency':
@@ -349,8 +333,8 @@ def repair_strategy(method='balance'):
         gradient_vanish_strategy=['relu_1','selu_1','bn_1']
         gradient_explode_strategy=['relu_1','selu_1','tanh_1','gradient_2','bn_1']#1 ,
         dying_relu_strategy=['selu_1','initial_3','leaky_3','bn_1']#
-        unstable_strategy=['adam_1','lr_3','ReduceLR_1','batch_3','momentum_3','GN_1']#
-        not_converge_strategy=['optimizer_3','lr_3']
+        unstable_strategy=['adam_1','lr_3','ReduceLR_1','batch_4','momentum_3','GN_1','initial_3']#
+        not_converge_strategy=['optimizer_3','lr_3','initial_3']
         over_fitting_strategy=['regular_1','dropout_1','estop_1','GN_1']
         # over_fitting_strategy=['regular_1','dropout_1','GN_1']
     else:
@@ -442,12 +426,28 @@ def op_adam(model,config,issue,j,config_set):#m
 
 def op_lr(model,config,issue,j,config_set):#m
     tmp_model=model
-    good_lr=[0.01,0.001]
     kwargs_list=[]
-    if (isinstance(issue,str) and issue=='unstable'):
-        kwargs_list.append(10**(-j-1))
-    elif (isinstance(issue,str) and issue=='not_converge'):
-        kwargs_list.append(10**(j+1))
+    describe=0
+    
+    if config['opt'].__class__==getattr(O, 'SGD'):
+        if issue=='not_converge':    
+            lr_try=0.01*(10**(j))
+        else:
+            lr_try=0.01*(0.1**(j))
+        if K.eval(config['opt'].lr)!=lr_try:
+            kwargs_list.append(lr_try/K.eval(config['opt'].lr))
+        else:
+            return model,config,describe,True,config_set
+    else:
+        if issue=='not_converge':    
+            lr_try=0.001*(10**(j))
+        else:
+            lr_try=0.001*(0.1**(j))
+        if K.eval(config['opt'].lr)!=lr_try:
+            kwargs_list.append(lr_try/K.eval(config['opt'].lr))
+        else:
+            return model,config,describe,True,config_set
+
     config['opt']=modify_optimizer(config['opt'],kwargs_list,method='lr')
     config_set['opt_kwargs']['lr']=K.eval(config['opt'].lr)
     describe = "Using '{}' learning rate in the optimizer.".format(str(kwargs_list[0]))
@@ -484,10 +484,22 @@ def op_momentum(model,config,issue,j,config_set):#m
     return tmp_model,config,describe,False,config_set
 
 
+# def op_batch(model,config,issue,j,config_set):#m
+#     tmp_model=model
+#     #a=[2,4,8,16]
+#     config['batch_size']=(2**(j+1))*config['batch_size']
+#     describe="Using 'batch_size {}' in model training.".format(str(config['batch_size']))
+#     config_set['batchsize']=config['batch_size']
+#     return tmp_model,config,describe,False,config_set
+
 def op_batch(model,config,issue,j,config_set):#m
     tmp_model=model
-    #a=[2,4,8,16]
-    config['batch_size']=(2**(j+1))*config['batch_size']
+    batch_try=(32*(2**j))
+    describe=0
+    if config['batch_size']!=batch_try:
+        config['batch_size']=batch_try
+    else: 
+        return model,config,describe,True,config_set
     describe="Using 'batch_size {}' in model training.".format(str(config['batch_size']))
     config_set['batchsize']=config['batch_size']
     return tmp_model,config,describe,False,config_set
