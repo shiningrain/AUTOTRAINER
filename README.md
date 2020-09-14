@@ -1,5 +1,8 @@
 # AUTOTRAINER
-An Automatic DNN TrainingProblem Detection and Repair System
+
+## TL;DR
+
+Automatic detecting and fixing DNN training problem at run time. Existing system can handle:
 
 
 ## How effective is AUTOTRAINER in detecting and fixing training problems?
