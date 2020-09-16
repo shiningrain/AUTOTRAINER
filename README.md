@@ -20,8 +20,9 @@ $ python demo.py
 ## Results
 
 ### Effectiveness
+![avatar](https://shiningrain.github.io/tmpfigure/ICSE21/Figure3.png)
 
-Figure!
+
 
 ### Efficiency
 
