@@ -26,6 +26,6 @@ for i in range(train_num):
     model = load_model("minist_relu_layer=20.h5")
     model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     history = model.fit(x_train, y_train, batch_size=32,epochs=epochs,verbose=1,validation_data=(x_test, y_test))
-    csv_name = "case_16_later=20_%s.csv".format(i)
+    csv_name = "case_1_later=20_%s.csv".format(i)
     pandas.DataFrame(history.history).to_csv(csv_name)
     K.clear_session()
