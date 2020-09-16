@@ -20,7 +20,7 @@ $ python demo.py
 ## Results
 
 ### Effectiveness
-![avatar](https://shiningrain.github.io/tmpfigure/ICSE21/Figure3.png)
+![avatar](https://github.com/shiningrain/tmpfigure/blob/master/ICSE21/Figure3.png)
 
 
 
