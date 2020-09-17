@@ -1,6 +1,3 @@
-[TOC]
-
-
 # AUTOTRAINER
 
 ## TL;DR
