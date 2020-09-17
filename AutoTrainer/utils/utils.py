@@ -313,23 +313,30 @@ def model_train(model,
     """[summary]
     Args:
         model ([model loaded by keras or str]): [a model you want to train or a model path(string)]
+        train_config_set ([dict]): [a dict with all training configurations, using as a backup]
         optimizer ([str]): [the optimizer you want to use]
         loss ([str]): [usually 'categorical_crossentropy' or 'binary_crossentropy']
         dataset ([dic]): [a dictionary which contains 'x''y''x_val''y_val']
         iters ([int]): [max iterations in training]
         batch_size ([int]): [batch_size in training]
-        log_path ([str]): [the path you want to save the training log]
+        log_dir ([str]): [the directory you want to save the training log (a csv file)]
         callbacks ([list]): [a list of the callbacks you want to use in the training. e.g., tensorboard , reducelr, earlystop]
+        root_path ([str]): [the directory you want to save the result of each solution (a csv file)]
+        new_issue_dir ([str]): [the directory you want to save the model with new training problems after repaired the existing one]
         verb (int, optional): [model.fit, verbose]. Defaults to 0.
+        determine_threshold(int, optional): [the alpha value in training, not be used now, will be removed later]. Defaults to 1.
         save_dir (str, optional): [the dir you want to save all result(include the training report, trained model with each solution)].\
-            Defaults to './tmp'.
-        checktype (str, optional): ['a_b', a can be chosen from ['epoch', 'batch'], b is number, it means the monitor will check \
-            the gradient and loss every 'b' 'a'.]. Defaults to 'epoch_3'.
+            Defaults to './tool_log'.
+        checktype (str, optional): ['epoch_xx', xx is a number, it relates to the problem checker interval]. Defaults to 'epoch_3'.
         autorepair (bool, optional): [whether the user want our tools to auto repair or not, if not our tools will return the problems \
             and corresponding solutions, if yes, will return trained model and description and logs ]. Defaults to True.
-        modification_sufferance (int, optional): [description]. Defaults to 3.
-        satisfied_acc(float,optional):the satisfied accuracy in training, it will be used to dertermine if it has converged.
+        modification_sufferance (int, optional): [The sufferance to the model modification of the solutions. The greater it is, \
+            the more the solution can modify the model]. Defaults to 3.
+        memory_limit (bool, optional): [The memory limitation of the solutions. While True, some solutions which requires greater\
+            memory will be disabled]. Defaults to False.
+        satisfied_acc(float,optional):[the satisfied accuracy in training, not be used now, will be removed later] Default to be 0.7.
         strategy (str, optional): [chosen from ['balance','efficient','structure',it will determine the solution order when solving the problem ]]. Defaults to 'balance'.
+        params (dict, optional): [the configurable parameters dict.]. Default to be {}
 
     Returns:
         [type]: [if autorepair is True, return a trained model and the log/description file path.\
