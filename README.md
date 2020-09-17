@@ -21,6 +21,23 @@ $ python demo.py
 2. Motivation: It contains two test cases shown that 1) Training problem occurrence is highly random. 2) The time when a training problem occurs is random. The way to reproduce these cases can be found [here](./Motivation/README.md).
 3. misc.: The [`README.md`](.README.md) shows how to use the our demos, the repo structure, the way to reproduce our experiments and our experiment results. The `requirement.text` shows all the dependencies of AUTOTRAINER.
 
+```
+- AutoTrainer/                 
+    - data/    
+    - demo_case/  
+        - Gradient_Vanish_Case/
+        - Oscillating_Loss_Case/
+    - utils/         
+    - reproduce.py             
+    - README.md                  
+- Motivation/                      
+    - DyingReLU/
+    - OscillatingLoss/
+    - README.md
+- README.md
+- requirements.txt
+```
+
 ## Results
 
 ### Effectiveness
