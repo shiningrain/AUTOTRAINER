@@ -8,7 +8,8 @@ Automatic detecting and fixing DNN training problem at run time.
 
 1. AutoTrainer: It mainly contains the source codes of the AUTOTRAINER (the folder `data` and `utils`), two demo cases. You can find a easy start [here](./AutoTrainer/README.md). The way to run the demo cases has been shown [here](#Demo).
 2. Motivation: It contains two test cases shown that 1) Training problem occurrence is highly random. 2) The time when a training problem occurs is random. The way to reproduce these cases can be found [here](./Motivation/README.md).
-3. misc.: The [`README.md`](./README.md) shows how to use the our demos, the repo structure, the way to reproduce our experiments and our experiment results. And the `requirement.text` shows all the dependencies of AUTOTRAINER.
+3. Result: It contains the required experiments and corresponding results.You can find them [here](./Result)
+4. misc.: The [`README.md`](./README.md) shows how to use the our demos, the repo structure, the way to reproduce our experiments and our experiment results. And the `requirement.text` shows all the dependencies of AUTOTRAINER.
 
 ```
 - AutoTrainer/                 
@@ -23,6 +24,7 @@ Automatic detecting and fixing DNN training problem at run time.
     - DyingReLU/
     - OscillatingLoss/
     - README.md
+- Result/
 - README.md
 - requirements.txt
 ```
