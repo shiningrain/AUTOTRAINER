@@ -1,0 +1,6 @@
+Problems,#Repaired Models,Avg Improve(%)
+Gradient Vanish,34,43.03%
+Gradient Explode,38,66.75%
+Dying ReLU,17,46.45%
+Oscillating Loss,17,0.12%
+Slow Convergence,149,45.85%
