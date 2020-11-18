@@ -1,6 +1,36 @@
-Problems,#Repaired Models,Avg Improve(%)
-Gradient Vanish,34,43.03%
-Gradient Explode,38,66.75%
-Dying ReLU,17,46.45%
-Oscillating Loss,17,0.12%
-Slow Convergence,149,45.85%
+Dataset,Problems,#Repaired Models,Avg Improve(%)
+Blob,GV,9,38.78
+,GE,5,30.40
+,DR,3,24.78
+,OL,2,-0.50
+,SC,27,43.01
+Circle,GV,8,30.08
+,GE,8,82.92
+,DR,7,28.10
+,OL,5,10.20
+,SC,43,33.64
+CIFAR-10,GV,5,56.17
+,GE,8,58.50
+,DR,3,59.81
+,OL,1,11.74
+,SC,28,52.72
+MNIST,GV,5,87.72
+,GE,6,87.68
+,DR,4,86.74
+,OL,3,56.97
+,SC,20,82.93
+Reuters,GV,2,20.12
+,GE,6,50.30
+,DR,-,-
+,OL,2,20.77
+,SC,20,37.58
+IMDB,GV,5,36.43
+,GE,5,85.94
+,DR,-,-
+,OL,4,-0.55
+,SC,11,33.43
+Total/Average,GV,34,45.04
+,GE,38,66.87
+,DR,17,46.91
+,OL,17,16.00
+,SC,149,46.05
