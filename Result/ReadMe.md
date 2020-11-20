@@ -51,7 +51,7 @@ We agree that there is a possibility for false positive cases in the detection. 
 
 Additionally, the table with all model detection and repair results can be found on our [GitHub page](https://anonymous.4open.science/repository/bd608c99-9d48-4f7b-8d32-240be875b892/Result/All_models_detail.csv)).
 
-### Comparison with AutoML
+## Related work: Comparison with AutoML
 
 AutoTrainer can detect and repair problems automatically in the DNN model training procedure. It provides timely monitoring facing the training process and facilitates SE researchers in repairing buggy models automatically.
 
