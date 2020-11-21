@@ -21,9 +21,10 @@ The novel contribution of our work mainly includes 3 parts:
 The solutions are summarized from the previous works (e.g. [[50]], [[55]], [[68]], [[70]]) and the citations have been shown in System Design Part.D in the paper. 
 
 ### Our Models in Experiments
-We collect models from the open-source community(e.g. [link1](https://machinelearningmastery.com/how-to-fix-vanishing-gradients-using-the-rectified-linear-activation-function/),[link2](https://github.com/grasool/explore-gradients)). 
 
-All the models and raw experiments data can be downloaded from the [link](https://drive.google.com/file/d/1AnzEwQZtKXAXA6jo4xGdhRLuAjnUFMLd/view?usp=sharing). 
+The experiments models we obtained are from ML/SE researchers and companies。
+
+All raw experiments data can be downloaded from the [link](https://drive.google.com/file/d/1AnzEwQZtKXAXA6jo4xGdhRLuAjnUFMLd/view?usp=sharing). 
 
 ### The Detailed Methodology of our Benchmark
 
