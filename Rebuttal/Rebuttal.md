@@ -1,16 +1,18 @@
 # Q&A
 
-## **Q1: More Experiments Details, e.g. accuracy improvement, results of all models**
+## Common Questions and Answers
+
+###  **Q1: More Experiments Details, e.g. accuracy improvement, results of all models**
 
 Answer:
 
-Due to the space limitations, we can only include part of our experiments results in the paper(which we think are the most important ones). We do have most(at least partial) of the required experiments results (e.g. Table II with all models, accuracy improvement for each kind of problems), and they can be found in our this directory. We also open-source AutoTrainer and share raw experiment data in [this page](https://anonymous.4open.science/repository/bd608c99-9d48-4f7b-8d32-240be875b892). Following your proposal, we will integrate more experiments details into the paper in our next version.
+Due to the space limitations, we can only include part of our experiments results in the paper(which we think are the most important ones). We do have most(at least partial) of the required experiments results (e.g. Table II with all models, accuracy improvement for each kind of problems), and they can be found in our this directory. Following your valuable proposal, we will integrate more experiments details into the paper in our next version.
 
-The experiments models we obtained are from ML/SE researchers and companies. All the raw experiment data can be downloaded from [this link](https://drive.google.com/file/d/1AnzEwQZtKXAXA6jo4xGdhRLuAjnUFMLd/view?usp=sharing). More detail will be integrated in paper in next version.
+Additionally, the experiments models we obtained are from ML/SE researchers and companies. All the raw experiment data can be downloaded from [this link](https://drive.google.com/file/d/1AnzEwQZtKXAXA6jo4xGdhRLuAjnUFMLd/view?usp=sharing).
 
 
 
-## **Q2: What is our challenge, novelty and contribution?**
+###  **Q2: What is our challenge, novelty and contribution?**
 
 Answer:
 
@@ -18,7 +20,7 @@ The novel contribution of our work mainly includes 3 parts:
 
 1. AutoTrainer gives the first formal definition of all these training problems and selects the proper parameters.
    
-   None of existing works (e.g. [[21]],[[72]],[[90]]) has proposed formal definition for the training problems symptoms. One of our challenges is to summarize the formal definitions from existing works. This involves interviewing hundreds of researchers/engineers, paper summarizations and tons of experiments..
+   None of existing works (e.g. [[21]],[[72]],[[90]]) has proposed formal definition for the training problems symptoms. One of our challenges is to summarize the formal definitions from existing works. This involves interviewing hundreds of researchers/engineers, paper summarizations and tons of experiments.
 
 2. AutoTrainer builds the connection between proposed solutions and existing problems
    
@@ -26,18 +28,9 @@ The novel contribution of our work mainly includes 3 parts:
 
 3. AutoTrainer is the first online model fixing strategy.
    
-   Detecting and repairing the training problems automatically is an important SE problem and no existing solutions have been proposed. The previous solution for the problems needs the developers to reproduce and repair the problems manually after training, which will waste plenty of time and inefficient. One of the novel contributions of our work is that AutoTrainer is the first tool to automatically and accurately detect and repair the problems in time during the training. The users don't need to wait to solve the problems manually until training finished.
+   Unlike most existing work which tries to improve model accuracy after training, AutoTrainer fixes this while training. This requires online program rewriting (i.e., adding normalization layers) as well as careful design to balance runtime overhead and problem detection/repairing effectiveness.
 
-
-## **Q3: What is the practical value of our repair strategy?**
-
-Answer:
-
-The solutions in our repair strategy are from the existing works (e.g. [[50]],[[70]]) whose quality has already been commonly recognized. Our contribution is to collect various solutions from previous works, evaluate the truly effective ones and build the connection between solutions and problems.
-
-Additionally, we admit that our strategy can't solve all the problems. For some hidden problems which have hardly been reported and rarely solved, the existing solutions in AutoTrainer can not repair them. Therefore, we will open-source of our code and try to improve our solutions continuously.
-
-## **Q4: How do we set the configurable parameters?** 
+###  **Q3: How do we set the configurable parameters?** 
 
 Answer:
 
@@ -47,8 +40,11 @@ The suitable value for the Type-C parameters will be affected by the learning ta
 
 We suggest users fine-tune Type-C parameters according to their learning tasks to obtain better detection effect. We admit that the parameters tuning is the limitation of our work. We will provide our codes and open-source AutoTrainer to further improve the parameter tuning. We will also clarify in our next version.
 
+---
 
-## **Q5: What is the key difference from AutoTrainer to AutoML?** 
+## Question and Answer for Reviewer A
+
+###  **Q1: What is the key difference from AutoTrainer to AutoML?** 
 
 Answer:
 
@@ -56,8 +52,10 @@ AutoTrainer can detect and repair problems automatically in the DNN model traini
 
 Comparing with AutoTrainer, AutoML focuses on designing models for the training tasks, which may still face training problems when training. And AutoTrainer focuses on improving the training itself. These two works are complementary and not in conflict. We will integrate the discussion into Relate Work Part in our next version.
 
+---
+## Questions and Answers for Reviewer B
 
-## **Q6: What is the detailed methodology of our benchmark?**
+###  **R2Q1: What is the detailed methodology of our benchmark?**
 
 Answer:
 
@@ -68,7 +66,7 @@ The methodology of benchmark in our experiments mainly contains 3 steps:
 3. Finally, we calculate the accuracy improvement for each repaired model by the repair log. For the models which are failed to repair, we can also analyze the failure log to understand the details of the repair process. Based on the above, we can record the effectiveness and efficiency of AutoTrainer and obtain the data in Table II in paper.
 
 
-## **Q7: How to explain the details in our work?( i.e. Training Cost, Symptoms,Solution Effect,FP models and wrongly triggered)**
+###  **R2Q2: How to explain the details in our work?( i.e. Training Cost, Symptoms,Solution Effect,FP models and wrongly triggered)**
 
 Answer:
 
@@ -88,7 +86,16 @@ We agree that there is a possibility for false positive cases in the detection. 
 
 Additionally, the table with all model detection and repair results can be found on our [GitHub page](./All_models_detail.csv)).
 
+---
+## Question and Answer for Reviewer C
 
+###  **R3Q1: What is the practical value of our repair strategy?**
+
+Answer:
+
+The solutions in our repair strategy are from the existing works (e.g. [[50]],[[70]]) whose quality has already been commonly recognized. Our contribution is to collect various solutions from previous works, evaluate the truly effective ones and build the connection between solutions and problems.
+
+Additionally, we admit that our strategy can't solve all the problems. For some hidden problems which have hardly been reported and rarely solved, the existing solutions in AutoTrainer can not repair them. Therefore, we will open-source of our code and try to improve our solutions continuously.
 
 [21]:https://arxiv.org/abs/2005.06195
 [50]:https://arxiv.org/abs/1502.03167
