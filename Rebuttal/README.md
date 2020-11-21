@@ -3,17 +3,17 @@
 ## Our Contribution , novelty and challenge.
 The novel contribution of our work mainly includes 3 parts:
 
-1. We are the first work to formally define 5 training problems and symptoms, and the first to systematically match problems and their solutions.
+1. AutoTrainer gives the first formal definition of all these training problems and selects the proper parameters.
    
-   None of existing works (e.g. [[21]],[[72]],[[90]]) has proposed formal definition for the training problems symptoms. One of our challenges is to summarize the formal definitions from plenty of existing works. To finish the definitions, we not merely survey for the previous works and open-source communities about training problems, but also discuss with developers.
+   None of existing works (e.g. [[21]],[[72]],[[90]]) has proposed formal definition for the training problems symptoms. One of our challenges is to summarize the formal definitions from existing works. This involves interviewing hundreds of researchers/engineers, paper summarizations and tons of experiments.
 
-2. We collect various solutions from the open-source community and existing works and conduct large scale evaluation to map each training problem with truly effective solutions.
+2. AutoTrainer builds the connection between proposed solutions and existing problems
    
-   To obtain the effective solutions for the training problems, we firstly collect over 20 solutions from dozens of the existing works (e.g. [[50]],[[70]]) and communities discussions(e.g. [link1](https://stackoverflow.com/questions/46270122/avoiding-vanishing-gradient-in-deep-neural-networks), [link2](https://stackoverflow.com/questions/43436966/gradient-exploding-when-using-rmsprop)). Because not all proposed solutions are effective for solving problems practically, then we evaluate these solutions on different problems repeatedly to find out the effective ones, which is a difficult SE engineering. Part of our evaluation log can be found [here](https://anonymous.4open.science/repository/bd608c99-9d48-4f7b-8d32-240be875b892/Result/Evaluation_log_raw.pdf).
+   To obtain the effective solutions for the training problems, we firstly collect over 20 solutions from dozens of the existing works (e.g. [[50]],[[70]]) and communities discussions(e.g. [link1](https://stackoverflow.com/questions/46270122/avoiding-vanishing-gradient-in-deep-neural-networks), [link2](https://stackoverflow.com/questions/43436966/gradient-exploding-when-using-rmsprop)). Many methods are proposed to solve a single problem, which may lead to other problems or may fix other problems. It is challenging to select the proper solutions for an observed problem. We evaluated over 20 different training strategies and problems, and selected the meaningful ones.
 
-3. We propose the first automatic approach to detect and repair 5 different training problems timely during model training.
+3. AutoTrainer is the first online model fixing strategy.
    
-   Detecting and repairing the training problems automatically is an important SE problem and no existing solutions have been proposed. The previous solution for the problems needs the developers to reproduce and repair the problems manually after training, which will waste plenty of time and inefficient. One of the novel contributions of our work is that AutoTrainer is the first tool to automatically and accurately detect and repair the problems in time during the training. The users don't need to wait to solve the problems manually until training finished.
+   Unlike most existing work which tries to improve model accuracy after training, AutoTrainer fixes this while training. This requires online program rewriting (i.e., adding normalization layers) as well as careful design to balance runtime overhead and problem detection/repairing effectiveness.
 
 ## The Expeirment Details
 
@@ -31,13 +31,13 @@ All raw experiments data can be downloaded from the [link](https://drive.google.
 The methodology of benchmark in our experiments mainly contains 3 steps:
 
 1. We start **two parallel trainings** for each model and make sure they have been trained with the same optimization, same training configuration and same environment. The only difference is that one is training with AutoTrainer and the other one is not.
-2. Then we compare and analyze two training results. The training results with AutoTrainer will contain detection results, repair results(if models do contain problems) and other training logs(e.g.accuracy, training time, memory). And the training results without Autotrainer will only contain training logs. In this process, due to the parallel training results, we can easily calculate the amount of FP and FN models. FP models should be the buggy models with good performance in the training without AutoTrainer. And the FN models should be normal models with terrible performance without AutoTrainer.
+2. Then we compare and analyze two training results. The training results with AutoTrainer will contain detection results, repair results(if models do contain problems) and other training logs(e.g.accuracy, training time, memory usage). And the training results without Autotrainer will only contain training logs.
 3. Finally, we calculate the accuracy improvement for each repaired model by the repair log. For the models which are failed to repair, we can also analyze the failure log to understand the details of the repair process. Based on the above, we can record the effectiveness and efficiency of AutoTrainer and obtain the data in Table II in paper.
 
 ### Explanation for Paper Details
 
 **Training Cost:**
-AutoTrainer can save the training resource by automatic detection and repair problems which the users should reproduce and debug manually in the past. It means that with AutoTrainer, users don't need to solve the problem after training but repair the model timely in training procedure. But the saved cost of this process is hard to quantify. In Evaluation Part.C, we analyze the overhead of AutoTrainer to show the efficiency of AutoTrainer, which only has 1.19 extra runtime overhead and no noticeable memory overhead.
+AutoTrainer can save the training resource by automatic detection and repair problems which the users should reproduce and debug manually in the past. It means that with AutoTrainer, users don't need to solve the problem after training but repair the model timely in training procedure. Thus, overall savings should be larger than reported.
 
 **Symptoms Definitions:**
 These definitions in our work are summarized from the previous works which have been widely accepted. The citation(e.g. [[72]],[[90]]) have been shown in Table I of the paper.
@@ -56,13 +56,13 @@ Additionally, the table with all model detection and repair results can be found
 
 AutoTrainer can detect and repair problems automatically in the DNN model training procedure. It provides timely monitoring facing the training process and facilitates SE researchers in repairing buggy models automatically.
 
-Comparing with AutoTrainer, AutoML focuses on using and adjusting different model structures for the training tasks, which may still face training problems when training. And AutoTrainer focuses on the technology support for the potential problems in the training. These two works are complementary and not in conflict. We will integrate the discussion into Relate Work Part in our next version.
+Comparing with AutoTrainer, AutoML focuses on designing models for the training tasks, which may still face training problems when training. And AutoTrainer focuses on improving the training itself. These two works are complementary and not in conflict. We will integrate the discussion into Relate Work Part in our next version.
 
 
 ## Supplementary Results
 1. [`Accuracy_improvement_on_problems.csv`](./Accuracy_improvement_on_problems.csv) shows the accuracy improvement on each training problems.
 2. [`All_model_detail.csv`](./All_models_detail.csv) shows all the training and repair results of all models.
-3. [`Evaluation_log_raw`](./Evaluation_log_raw.pdf) shows part of our raw evaluation log of different solutions from existing works and open source communities. 
+3. [`Evaluation_log_raw.pdf`](./Evaluation_log_raw.pdf) shows part of our raw evaluation log of different solutions from existing works and open source communities. 
 
 
 [50]:https://arxiv.org/abs/1502.03167

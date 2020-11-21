@@ -71,7 +71,7 @@ The methodology of benchmark in our experiments mainly contains 3 steps:
 Answer:
 
 **Training Cost:**
-AutoTrainer can save the training resource by automatic detection and repair problems which the users should reproduce and debug manually in the past. It means that with AutoTrainer, users don't need to solve the problem after training but repair the model timely in training procedure. This saved cost of this process is hard to quantify.
+AutoTrainer can save the training resource by automatic detection and repair problems which the users should reproduce and debug manually in the past. It means that with AutoTrainer, users don't need to solve the problem after training but repair the model timely in training procedure.  Thus, overall savings should be larger than reported.
 
 **Symptoms Definitions:**
 These definitions in our work are summarized from the previous works which have been widely accepted. The citation(e.g. [[72]],[[90]]) have been shown in Table I of the paper.
