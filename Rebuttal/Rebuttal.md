@@ -44,7 +44,7 @@ We suggest users adjust Type-B parameters according to their learning tasks to o
 
 ## Question and Answer for Reviewer A
 
-###  **Q1: What is the key difference from AutoTrainer to AutoML? ** 
+###  **Q1: What is the key difference from AutoTrainer to AutoML?** 
 
 Answer:
 
@@ -55,7 +55,7 @@ Comparing with AutoTrainer, AutoML focuses on designing models for the training 
 ---
 ## Questions and Answers for Reviewer B
 
-###  **R2Q1: What is the detailed methodology of our benchmark?**
+###  **Q1: What is the detailed methodology of our benchmark?**
 
 Answer:
 
@@ -66,7 +66,7 @@ The methodology of benchmark in our experiments mainly contains 3 steps:
 3. Finally, we calculate the accuracy improvement or other detailed data for each repaired model by the repair log and training log. Based on the above, we can record the effectiveness and efficiency of AutoTrainer and obtain the data in Table II in paper.
 
 
-###  **R2Q2: How to explain the details in our work?( i.e. Training Cost, Symptoms,Solution Effect,FP models and wrongly triggered)**
+###  **Q2: How to explain the details in our work?( i.e. Training Cost, Symptoms,Solution Effect,FP models and wrongly triggered)**
 
 Answer:
 
@@ -89,7 +89,7 @@ Additionally, the table with all model detection and repair results can be found
 ---
 ## Question and Answer for Reviewer C
 
-###  **R3Q1: What is the practical value of our repair strategy?**
+###  **Q1: What is the practical value of our repair strategy?**
 
 Answer:
 
