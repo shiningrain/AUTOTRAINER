@@ -1,10 +1,12 @@
-**Q1: More Experiments Details, e.g. accuracy improvement, results of all models**
+# Q&A
+
+## **Q1: More Experiments Details, e.g. accuracy improvement, results of all models**
 
 Answer:
 
 Due to the space limitations, we can only include part of our experiments results in the paper(which we think are the most important ones). We do have most(at least partial) of the required experiments results (e.g. Table II with all models, accuracy improvement for each kind of problems), and they can be found in our [GitHub repository](https://anonymous.4open.science/repository/bd608c99-9d48-4f7b-8d32-240be875b892/Result/). We also open-source AutoTrainer and share raw experiment data in [this page](https://anonymous.4open.science/repository/bd608c99-9d48-4f7b-8d32-240be875b892). Following your proposal, we will integrate more experiments details into the paper in our next version.
 
-**Q2: What is our challenge, novelty and contribution?**
+## **Q2: What is our challenge, novelty and contribution?**
 
 Answer:
 
@@ -24,7 +26,7 @@ The novel contribution of our work mainly includes 3 parts:
 
 It is also worth to mention that, the solutions we implemented are from the existing works (e.g. [[50]],[[70]]) which have been widely accepted in training problems and also solve the problems effectively in our evaluation.
 
-**Q3: How do we set the configurable parameters?** 
+## **Q3: How do we set the configurable parameters?** 
 
 Answer:
 
@@ -36,7 +38,7 @@ However, the suitable value for the parameters will be affected by the learning 
 We suggest users fine-tune Type-C parameters according to their learning tasks to obtain better detection effect. We admit that the parameters tuning is the limitation of our work. We will provide our codes and open-source AutoTrainer to further improve the parameter tuning. We will also clarify in our next version.
 
 
-**Q4: What is the key difference from AutoTrainer to AutoML?** 
+## **Q4: What is the key difference from AutoTrainer to AutoML?** 
 
 Answer:
 
@@ -45,7 +47,7 @@ AutoTrainer can detect and repair problems automatically in the DNN model traini
 Comparing with AutoTrainer, AutoML focuses on using and adjusting different model structures for the training tasks, which may still face training problems when training. And AutoTrainer focuses on the technology support for the potential problems in the training. These two works are complementary and not in conflict. We will integrate the discussion into Relate Work Part in our next version.
 
 
-**Q5: What is the detailed methodology of our benchmark?**
+## **Q5: What is the detailed methodology of our benchmark?**
 
 Answer:
 
@@ -56,7 +58,7 @@ The methodology of benchmark in our experiments mainly contains 3 steps:
 3. Finally, we calculate the accuracy improvement for each repaired model by the repair log. For the models which are failed to repair, we can also analyze the failure log to understand the details of the repair process. Based on the above, we can record the effectiveness and efficiency of AutoTrainer and obtain the data in Table II in paper.
 
 
-**Q6: How to explain the details in our work?( i.e. Training Cost, Symptoms,Solution Effect,FP models and wrongly triggered)**
+## **Q6: How to explain the details in our work?( i.e. Training Cost, Symptoms,Solution Effect,FP models and wrongly triggered)**
 
 Answer:
 
@@ -77,7 +79,7 @@ We agree that there is a possibility for false positive cases in the detection. 
 Additionally, the table with all model detection and repair results can be found on our [GitHub page](./All_models_detail.csv)).
 
 
-**Q7: How do we collect the buggy models?** 
+## **Q7: How do we collect the buggy models?** 
 
 Answer:
 
@@ -85,7 +87,7 @@ We collect the experiments models from the open-source community and blogs,(e.g.
 
 
 
-**Q8: What is the practical value of our repair strategy?**
+## **Q8: What is the practical value of our repair strategy?**
 
 Answer:
 
