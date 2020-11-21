@@ -14,17 +14,21 @@ Additionally, the experiments models we obtained are from ML/SE researchers and 
 
 
 
-###  **Q2: What is our challenge, novelty and contribution? (R1, R2, R3)**
+###  **Q2: What is our challenge, novelty, contribution and limitations? (R1, R2, R3)**
 
 Answer:
 
-AutoTrainer is challenging and novel. In next revision, we will add more discussions on challenges, insights.
+AutoTrainer is challenging and novel. In next revision, we will add more discussions on challenges, insights and limitations.
 
 Firstly, AutoTrainer gives the first formal definition of all these training problems and selects the proper parameters. None of existing works (e.g. [[21]],[[72]],[[90]]) has proposed formal definition for the training problems symptoms. One of our challenges is to summarize the formal definitions from existing works. This involves interviewing hundreds of researchers/engineers, paper summarizations and tons of experiments.
 
 Secondly, AutoTrainer builds the connection between proposed solutions and existing problems. Many methods are proposed to solve a single problem, which may lead to other problems or may fix other problems. It is challenging to select the proper solutions for an observed problem. To obtain the effective solutions for the training problems, we firstly collect and evaluate over 20 solutions from the existing works (e.g. [[50]],[[70]]) and communities discussions(e.g. [link1](https://stackoverflow.com/questions/46270122/avoiding-vanishing-gradient-in-deep-neural-networks), [link2](https://stackoverflow.com/questions/43436966/gradient-exploding-when-using-rmsprop)), and selected the meaningful ones.
 
 Thirdly, AutoTrainer is the first online model fixing strategy. Unlike most existing work which tries to improve model accuracy after training, AutoTrainer fixes this while training. This requires online program rewriting (i.e., adding normalization layers) as well as careful design to balance runtime overhead and problem detection/repairing effectiveness.
+
+We were not able to share some of aforementioned experiments (e.g., failed solutions and parameters) due to page limit and copyright issues (i.e., models and datasets). Summarized data can be found on [this page](./README.md). We will add more details in our next version.
+
+We admit AutoTrainer has its limitations in detecting other bugs. We will add more discussions on this. How to improve it will be our future work.
 
 ###  **Q3: How do we set the configurable parameters? (R1, R2)** 
 
