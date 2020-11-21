@@ -2,7 +2,7 @@
 
 ## Common Questions and Answers
 
-###  **Q1: More Experiments Details, e.g. accuracy improvement, results of all models**
+###  **Q1: More Experiments Details, e.g. accuracy improvement, results of all models. (R1, R2, R3)**
 
 Answer:
 
@@ -12,7 +12,7 @@ Additionally, the experiments models we obtained are from ML/SE researchers and 
 
 
 
-###  **Q2: What is our challenge, novelty and contribution?**
+###  **Q2: What is our challenge, novelty and contribution? (R1, R2, R3)**
 
 Answer:
 
@@ -30,7 +30,7 @@ The novel contribution of our work mainly includes 3 parts:
    
    Unlike most existing work which tries to improve model accuracy after training, AutoTrainer fixes this while training. This requires online program rewriting (i.e., adding normalization layers) as well as careful design to balance runtime overhead and problem detection/repairing effectiveness.
 
-###  **Q3: How do we set the configurable parameters?** 
+###  **Q3: How do we set the configurable parameters? (R1, R2)** 
 
 Answer:
 
@@ -44,7 +44,7 @@ We suggest users fine-tune Type-C parameters according to their learning tasks t
 
 ## Question and Answer for Reviewer A
 
-###  **Q1: What is the key difference from AutoTrainer to AutoML?** 
+###  **Q1: What is the key difference from AutoTrainer to AutoML? ** 
 
 Answer:
 
