@@ -39,12 +39,12 @@ The little effect models have already been shown in the purple rows in Table II.
 
 We agree that false positives can happen even though we have not observed one. We will clarify this in our next version.
 
-Additionally, the table with all model detection and repair results can be found on our [GitHub page](https://anonymous.4open.science/repository/bd608c99-9d48-4f7b-8d32-240be875b892/Result/All_models_detail.csv)).
+Additionally, the table with all model detection and repair results can be found on our [GitHub page](https://anonymous.4open.science/repository/bd608c99-9d48-4f7b-8d32-240be875b892/Result/All_models_detail.tsv)).
 
 
 ## Supplementary Results
-1. [`Accuracy_improvement_on_problems.csv`](./Accuracy_improvement_on_problems.csv) shows the accuracy improvement on each training problems.
-2. [`All_model_detail.csv`](./All_models_detail.csv) shows all the training and repair results of all models.
+1. [`Accuracy_improvement_on_problems.tsv`](./Accuracy_improvement_on_problems.tsv) shows the accuracy improvement on each training problems.
+2. [`All_model_detail.tsv`](./All_models_detail.tsv) shows all the training and repair results of all models.
 3. [`Evaluation_log_raw.pdf`](./Evaluation_log_raw.pdf) shows part of our raw evaluation log of different solutions from existing works and open source communities. 
 
 
