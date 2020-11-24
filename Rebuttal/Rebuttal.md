@@ -63,13 +63,13 @@ Additionally, the table with all model detection and repair results can be found
 
 **R2Q3: Other details in paper**
 
-**R2Q3.1 The definitions of symptoms:**
+**3.1 The definitions of symptoms:**
 These definitions of symptoms in our work are summarized from the existing works and experiments (ref to Q2) which have been widely accepted. The citations have been shown in Table I of the paper. We will try to improve the formalization continuously in the future.
 
-**R2Q3.2 The effect of solutions:**
+**3.2 The effect of solutions:**
 The effect of each solution and how many models it repaired in experiments have been shown in Table III in paper. The corresponding explanations are shown in Evaluation Part.B in paper.
 
-**R2Q3.3 Little effect models:**
+**3.3 Little effect models:**
 The little effect models have already been shown in the purple rows in Table II. And we also analyzed them in Section-V-B in paper. The detection and repair results of all 495 models are shown in [this table](./All_models_detail.tsv)).
 
 **R3Q1: Practical value of Solutions**
