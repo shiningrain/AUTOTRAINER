@@ -1,5 +1,5 @@
 import numpy as np
-from keras.datasets import cifar10
+from tensorflow.keras.datasets import cifar10
 
 def load_data():
     (x, y), (x_val, y_val) = cifar10.load_data()

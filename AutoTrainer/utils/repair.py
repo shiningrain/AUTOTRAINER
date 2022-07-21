@@ -1,33 +1,34 @@
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 import sys
 sys.path.append('.')
 # from utils import has_NaN
 import matplotlib.pyplot as plt
 import numpy as np
-import keras
+from tensorflow import keras
 import datetime
 from TimeCounter import TimeHistory
-from keras.models import load_model,Sequential
-import keras.backend as K
+from tensorflow.keras.models import load_model,Sequential
+import tensorflow.keras.backend as K
 import tensorflow as tf
 from logger import Logger
 import copy
 logger = Logger()
 
-from keras.models import load_model
-from keras.models import Model
-from keras.activations import relu,sigmoid,elu,linear,selu
-from keras.regularizers import l2,l1,l1_l2
-from keras.layers import BatchNormalization,GaussianNoise,Dropout
-from keras.layers import Activation,Add,Dense
-from keras.layers.core import Lambda
-from keras.initializers import he_uniform,glorot_uniform,zeros
-from keras.callbacks.callbacks import ReduceLROnPlateau
-from keras.optimizers import SGD, Adam, Adamax
-import keras.optimizers as O
-import keras.layers as L
-import keras.activations as A
-import keras.initializers as I
+from tensorflow.keras.models import load_model
+from tensorflow.keras.models import Model
+from tensorflow.keras.activations import relu,sigmoid,elu,linear,selu
+from tensorflow.keras.regularizers import l2,l1,l1_l2
+from tensorflow.keras.layers import BatchNormalization,GaussianNoise,Dropout
+from tensorflow.keras.layers import Activation,Add,Dense
+from tensorflow.keras.layers import Lambda
+from tensorflow.keras.initializers import he_uniform,glorot_uniform,zeros
+from tensorflow.keras.callbacks import ReduceLROnPlateau
+from tensorflow.keras.optimizers import SGD, Adam, Adamax
+import tensorflow.keras.optimizers as O
+import tensorflow.keras.layers as L
+import tensorflow.keras.activations as A
+import tensorflow.keras.initializers as I
 
 tmp_model_path='./tmp_models'
 Insert_Layers=['dense','lstm','conv']
@@ -81,7 +82,11 @@ def insert_intermediate_layer_in_keras(model, layer_id, new_layer):
         if i == layer_id:
             x = new_layer(x)
         x = layers[i](x)
-    new_model = Model(input=layers[0].input, output=x)
+    try:
+        new_model = Model(input=layers[0].input, output=x)
+    except:
+        new_model = Model(layers[0].input, x)
+    # new_model = Model(layers[0].input, x)
     return new_model
 
 
@@ -93,7 +98,11 @@ def replace_intermediate_layer_in_keras(model, layer_id, new_layer):
             x = new_layer(x)
         else:
             x = layers[i](x)
-    new_model = Model(input=layers[0].input, output=x)
+    try:
+        new_model = Model(input=layers[0].input, output=x)
+    except:
+        new_model = Model(layers[0].input, x)
+    # new_model = Model(layers[0].input, x)
     return new_model
 
 def modify_initializer(model,b_initializer=None,k_initializer=None):
@@ -140,6 +149,16 @@ def not_dense_acti(model,i):
             return False
     return True
 
+def modify_last_activations(model,activation_name):
+    activation=getattr(A, activation_name)
+    for i in range(len(model.layers)):
+        tmp_config=model.layers[-i-1].get_config()
+        if 'activation' in tmp_config['name'] or 'activation' in tmp_config:
+            new_config=copy.deepcopy(model.layers[-i-1].get_config())
+            new_config['activation']=activation
+            new_layer=model.layers[-i-1].__class__(**new_config)
+            model=replace_intermediate_layer_in_keras(model,len(model.layers)-1-i,new_layer)
+            return model
 
 def modify_activations(model,activation_name,method='normal'):#https://github.com/keras-team/keras/issues/9370
     """
@@ -171,6 +190,21 @@ def modify_activations(model,activation_name,method='normal'):#https://github.co
                     model=replace_intermediate_layer_in_keras(model,i,new_layer)
                 else:
                     model.layers[i].activation=activation
+
+        for i in range(int(last)):# special check for ReLU layers.
+            new_model=Sequential()
+            for layer in range(len(model.layers)): # go through until last layer
+                if 're_lu' not in model.layers[layer].get_config():
+                    if layer<=len(model.layers)-2 and 're_lu' in model.layers[layer+1].get_config()['name']:
+                        new_config=copy.deepcopy(model.layers[layer].get_config())
+                        new_config['activation']=activation
+                        # if new_model.layers==[]:
+                        #     new_config['input_shape']=model.layers[0].input_shape[0]
+                        new_layer=model.layers[layer].__class__(**new_config)
+                        new_model.add(new_layer)
+                    elif 're_lu' not in model.layers[layer].get_config()['name']:   
+                        new_model.add(model.layers[layer])
+        model=new_model
     if method=='special':# For leakyrelu and others
         i=0
         #layers_num=int(last_layer(model.layers))
@@ -203,6 +237,11 @@ def modify_activations(model,activation_name,method='normal'):#https://github.co
                 break
     model=reload_model(model)
     return model
+
+# model=load_model('/data/zxy/DL_tools/1Autokeras/test_codes/relu/b5e3c487/model.h5')
+# new_model=modify_activations(model,'selu')
+# print(1)
+
 
 def modify_regularizer(model,kernel_regularizer=l2(0.01),bias_regularizer=l2(0.01)):
     last=last_layer(model.layers)
@@ -288,7 +327,10 @@ def DNN_skip_connect(model,layer_name='dense'):#only activation
         if j%2 != 0 and j!=1 and 'activation' in layers[i].get_config()['name'] and layers[i].get_config()['activation']=='relu':
             x = Add()([temp_x,x])
         x = layers[i](x)
-    new_model = Model(input=layers[0].input, output=x)
+    try:
+        new_model = Model(input=layers[0].input, output=x)
+    except:
+        new_model = Model(layers[0].input, x)
     return new_model
 
 def modify_optimizer(optimizer,kwargs_list,method='lr'):
@@ -319,6 +361,9 @@ def repair_strategy(method='balance'):
         unstable_strategy=['adam_1','lr_3','ReduceLR_1','batch_4','momentum_3','GN_1','initial_3']#
         not_converge_strategy=['optimizer_3','lr_3','initial_3']
         over_fitting_strategy=['regular_1','estop_1','dropout_1','GN_1']#
+        activation_strategy=['activation_1']
+        loss_strategy=['loss_1']
+        data_strategy=['data_1']
     elif method=='structure':
         #first order: complexity; seconde order: efficiency.
         gradient_vanish_strategy=['relu_1','selu_1','bn_1']
@@ -327,6 +372,9 @@ def repair_strategy(method='balance'):
         unstable_strategy=['adam_1','lr_3','ReduceLR_1','batch_4','momentum_3','GN_1','initial_3']#
         not_converge_strategy=['optimizer_3','lr_3','initial_3']
         over_fitting_strategy=['estop_1','regular_1','dropout_1','GN_1']
+        activation_strategy=['activation_1']
+        loss_strategy=['loss_1']
+        data_strategy=['data_1']
         # over_fitting_strategy=['regular_1','dropout_1','GN_1']
     elif method=='efficiency':
         #first order: efficiency; seconde order: complexity.
@@ -337,12 +385,85 @@ def repair_strategy(method='balance'):
         not_converge_strategy=['optimizer_3','lr_3','initial_3']
         over_fitting_strategy=['regular_1','dropout_1','estop_1','GN_1']
         # over_fitting_strategy=['regular_1','dropout_1','GN_1']
+        activation_strategy=['activation_1']
+        loss_strategy=['loss_1']
+        data_strategy=['data_1']
     else:
         print('Not support this method')
         os._exit(0)#you can design your repair strategy here.
-    return [gradient_vanish_strategy,gradient_explode_strategy,dying_relu_strategy,unstable_strategy,not_converge_strategy,over_fitting_strategy]
+    return [gradient_vanish_strategy,gradient_explode_strategy,dying_relu_strategy,unstable_strategy,not_converge_strategy,over_fitting_strategy,
+            activation_strategy,loss_strategy,data_strategy]
+
+def select_acti(model):
+    # activation_list=['sigmoid','softmax']
+    if model.output_shape[-1]!=1:
+        return 'softmax'
+    else:
+        return 'sigmoid'
+    
+def select_loss(model,cur_loss):
+    regression_loss=['mean_squared_error','mean_absolute_error']
+    # classify_loss_list=['binary_crossentropy','categorical_crossentropy']
+    
+        
+    if model.output_shape[-1]!=1 and cur_loss!='categorical_crossentropy':
+        cur_loss='categorical_crossentropy'
+    elif model.output_shape[-1]==1 and cur_loss!='binary_crossentropy':
+        cur_loss='binary_crossentropy'
+    elif 'entro' in cur_loss:
+        cur_loss=np.random.choice(regression_loss,1)[0]
+    return cur_loss
+
+def preprocess(data_array):
+    from sklearn.preprocessing import MinMaxScaler
+    scaler=MinMaxScaler()
+    data_array=scaler.fit_transform(data_array.reshape(-1, data_array.shape[-1])).reshape(data_array.shape)
+    # data_array = data_array.astype('float32')
+    # mean = [125.307, 122.95, 113.865]
+    # std = [62.9932, 62.0887, 66.7048]
+    # for i in range(3):
+    #     data_array_2[:, :, :, i] = (data_array[:, :, :, i] - mean[i]) / std[i]
+    # data_array /= 255
+    
+    return data_array
+
+def reconstruct_model(model):
+    new_model=Sequential()
+    for layer in range(len(model.layers)): # go through until last layer
+        config=copy.deepcopy(model.layers[layer].get_config())
+        new_layer=model.layers[layer].__class__(**config)
+        new_model.add(new_layer)
+    # model.save('./tmp.h5')
+    # new_model.save('./tmp1.h5')
+    return new_model
 
 ##------------------------add solution describe here-----------------------------
+
+def op_loss(model, config, issue, j,config_set):
+    describe=0
+    new_loss=select_loss(model,config['loss'])
+    config['loss']=new_loss
+    config_set['loss']=new_loss
+    new_model=reconstruct_model(model) 
+    return new_model, config,describe, False,config_set
+
+def op_activation(model, config, issue, j,config_set):
+    describe=0
+    tmp_model = model
+    activation_name=select_acti(tmp_model)
+    if activation_name=='sigmoid' and 'entropy' not in config['loss']:
+        activation_name='linear' # for regression problem
+    tmp_model = modify_last_activations(model, activation_name)
+    return tmp_model, config,describe, False,config_set
+
+def op_preprocess(model, config, issue, j,config_set):
+    describe=0
+    data_set=config['dataset']
+    data_set['x']=preprocess(data_set['x'])
+    data_set['x_val']=preprocess(data_set['x_val'])
+    new_model=reconstruct_model(model) 
+    return new_model, config,describe, False,config_set
+
 def op_gradient(model, config, issue, j,config_set):  #m
     describe=0
     tmp_model = model
@@ -562,6 +683,12 @@ def op_regular(model,config,issue,j,config_set):
         return model,config,describe,True,config_set
     return tmp_model,config,describe,False,config_set
 
-def repair_default(model,config,issue,j):
+def repair_default(model,config,issue,j,config_set):
     print('Wrong setting')
     os._exit(0)
+
+
+if __name__=='__main__':
+    model=load_model('/data/zxy/DL_tools/DL_tools/AUTOTRAINER/AutoTrainer/demo_case/Gradient_Vanish_Case/model.h5')
+    new_model=modify_last_activations(model,'softmax')
+    print(1)

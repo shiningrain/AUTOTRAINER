@@ -5,12 +5,12 @@ import utils as utils
 import copy
 import matplotlib.pyplot as plt
 import numpy as np
-import keras
+from tensorflow import keras
 import datetime
 import repair as rp
 from TimeCounter import TimeHistory
-from keras.models import load_model,Sequential
-import keras.backend as K
+from tensorflow.keras.models import load_model,Sequential
+import tensorflow.keras.backend as K
 import tensorflow as tf
 from logger import Logger
 logger = Logger()
@@ -21,15 +21,15 @@ import copy
 import csv
 import pickle
 
-from keras.models import load_model
-from keras.models import Model
-from keras.activations import relu,sigmoid,elu,linear,selu
-from keras.layers import BatchNormalization,GaussianNoise
-from keras.layers import Activation,Add,Dense
-from keras.layers.core import Lambda
-from keras.initializers import he_uniform,glorot_uniform,zeros
-from keras.optimizers import SGD, Adam, Adamax
-from keras.callbacks.callbacks import ReduceLROnPlateau
+from tensorflow.keras.models import load_model
+from tensorflow.keras.models import Model
+from tensorflow.keras.activations import relu,sigmoid,elu,linear,selu
+from tensorflow.keras.layers import BatchNormalization,GaussianNoise
+from tensorflow.keras.layers import Activation,Add,Dense,Softmax
+from tensorflow.keras.layers import Lambda
+from tensorflow.keras.initializers import he_uniform,glorot_uniform,zeros
+from tensorflow.keras.optimizers import SGD, Adam, Adamax
+from tensorflow.keras.callbacks import ReduceLROnPlateau
 
 solution_evaluation = {
         'gradient' : {'modify':0, 'memory':False},
@@ -48,9 +48,15 @@ solution_evaluation = {
         'optimizer': {'modify':0 , 'memory':False},
         'regular':{'modify':1 , 'memory':False},#how
         'dropout':{'modify':2 , 'memory':False},#how
-        'estop':{'modify':0, 'memory':False}
+        'estop':{'modify':0, 'memory':False},
+        'activation':{'modify':0, 'memory':False},
+        'loss':{'modify':0, 'memory':False},
+        'data':{'modify':0, 'memory':False}
     }
 problem_evaluation = {# please use the priority order here
+    'activation_issue':3,
+    'loss_issue':3,
+    'abnormal_data':3,
     'vanish': 2,
     'explode': 2,
     'relu': 2,
@@ -72,7 +78,7 @@ def filtered_issue(issue_list):
             if new_issue_list==[] or problem_evaluation[issue_list[i]]>problem_evaluation[new_issue_list[0]]:
                 new_issue_list=[issue_list[i]]
         return new_issue_list
-    else:return issue_list
+    return issue_list
 
 def comband_solutions(solution_dic):
     solution=[]
@@ -143,7 +149,10 @@ def notify_result(num, model,config,issue,j,config_set):
         'regular':rp.op_regular,
         'dropout':rp.op_dropout,
         'estop':rp.op_EarlyStop,
-        'tanh':rp.op_tanh
+        'tanh':rp.op_tanh,
+        'loss':rp.op_loss,
+        'activation':rp.op_activation,
+        'data':rp.op_preprocess
     }
 
     method = numbers.get(num, rp.repair_default)
@@ -163,6 +172,8 @@ class Repair_Module:
         self.model = model
         self.issue_list = issue_list
         self.root_path=root_path
+        if not os.path.exists(root_path):
+            os.makedirs(root_path)
 
         self.initial_issue = copy.deepcopy(issue_list)
         self.train_config = training_config
@@ -174,7 +185,8 @@ class Repair_Module:
         #'_x' in strategy means this solution will be tried at most x times.
         strategy_list = rp.repair_strategy(method)
         self.gradient_vanish_strategy, self.gradient_explode_strategy, self.dying_relu_strategy,\
-            self.unstable_strategy, self.not_converge_strategy, self.over_fitting_strategy = filtered(
+            self.unstable_strategy, self.not_converge_strategy, self.over_fitting_strategy,\
+                self.activation_strategy,self.loss_strategy,self.data_strategy = filtered(
                 strategy_list, sufferance, memory)
         self.config_set_bk = config_set
         
@@ -270,7 +282,21 @@ class Repair_Module:
                     self.train_config=potential_list[2]
                     model_name='improved_model_'+str(potential_list[-3])+'.h5'
                     model_path=os.path.join(tmp_dir,model_name)
-                    self.model.save(model_path)
+                    # if os.path.exists(model_path):
+                    #     os.remove(model_path)
+                    try:
+                        self.model.save(model_path)
+                    except:
+                        #TODO: solve this problem
+                        print('Tensorflow Save Model Failed!! Save Without Optimizer Now!!! More Details ref to https://github.com/tensorflow/tensorflow/issues/27688')
+                        self.model.save(model_path, include_optimizer=False)
+                        # optimizer_config=
+                        optimizer_path=model_path.replace('.h5','_optimizer.pkl')
+                        optimizer_config={}
+                        optimizer_config['optimizer']=self.model.optimizer.get_config()
+                        optimizer_config['loss']=self.model.loss
+                        with open(optimizer_path, 'wb') as f:
+                            pickle.dump(optimizer_config, f)
                     
                     tmpset={}
                     tmpset['time']=time.time()-self.initial_time
@@ -291,7 +317,12 @@ class Repair_Module:
                         #save new model
                         model_path=os.path.join(new_dir,'new_model.h5')
                         config_path=os.path.join(new_dir,'new_config.pkl')
-                        self.model.save(model_path)
+                        try:
+                            self.model.save(model_path)
+                        except:
+                            print('Tensorflow Save Model Failed!! Save Without Optimizer Now!!! More Details ref to https://github.com/tensorflow/tensorflow/issues/27688')
+                            self.model.save(model_path, include_optimizer=False)
+
                         with open(config_path, 'wb') as f:
                             pickle.dump(new_config_set, f)
                         new_log_dir=os.path.join(new_dir,'monitor_train_log')
@@ -386,7 +417,10 @@ class Repair_Module:
             for j in range(tmp_tim):
                 # solutions
                 _break=False
-                model=copy.deepcopy(seed_model)
+                try:
+                    model=copy.deepcopy(seed_model)
+                except:
+                    model=seed_model
                 train_config=config_bk.copy()
                 config_set=copy.deepcopy(self.config_set_bk)
                 tmp_model,config,modify_describe,_break,new_config_set=notify_result(tmp_sol,model,train_config,issue_type,j,config_set)
@@ -397,6 +431,7 @@ class Repair_Module:
                 save_dir=os.path.join(tmp_dir,solution_dir)
                 repair_time=time.time()-start_time
                 
+                # TODO:load previous acc as satisfy acc
                 new_model,new_issue_list,train_result,retrain_history=utils.model_retrain(tmp_model,config,satisfied_acc=self.satisfied_acc,\
                     retrain_dir=tmp_dir,save_dir=save_dir,solution=tmp_sol,determine_threshold=self.determine_threshold,checktype=self.checktype)
 
@@ -421,7 +456,11 @@ class Repair_Module:
                     new_config_path=os.path.join(save_dir,new_config_name)
                     with open(new_config_path, 'wb') as f:
                         pickle.dump(new_config_set, f)
-                    new_model.save(model_path)
+                    try:
+                        new_model.save(model_path)
+                    except:
+                        print('Tensorflow Save Model Failed!! Save Without Optimizer Now!!! More Details ref to https://github.com/tensorflow/tensorflow/issues/27688')
+                        new_model.save(model_path, include_optimizer=False)
 
                     print('------------------Solved! Time used {}!-----------------'.format(str(time_used)))
                     log_file.write('------------------Solved! Time used {}!-----------------'.format(str(time_used)))
@@ -485,10 +524,17 @@ class Repair_Module:
             return 'dying_relu',self.dying_relu_strategy.copy()
         elif issue_type=='unstable':
             return 'training_unstable',self.unstable_strategy.copy()
+        elif issue_type=='loss_issue':
+            return 'training_loss_issue',self.loss_strategy.copy()
+        elif issue_type=='abnormal_data':
+            return 'training_abnormal_data',self.data_strategy.copy()
+        elif issue_type=='activation_issue':
+            return 'training_activation_issue',self.activation_strategy.copy()
         elif issue_type=='not_converge':
             return 'training_not_converge',self.not_converge_strategy.copy()
         elif issue_type=='overfit':
             return 'over_fitting',self.over_fitting_strategy.copy()
+    
     
     def update_current_solution(self,issue_type,solution):
         if issue_type=='vanish':
@@ -501,6 +547,12 @@ class Repair_Module:
             return self.unstable_strategy.remove(solution)
         elif issue_type=='not_converge':
             return self.not_converge_strategy.remove(solution)
+        elif issue_type=='loss_issue':
+            return self.loss_strategy.remove(solution)
+        elif issue_type=='activation_issue':
+            return self.activation_strategy.remove(solution)
+        elif issue_type=='abnormal_data':
+            return self.data_strategy.remove(solution)
         elif issue_type=='overfit':
             return self.over_fitting_strategy.remove(solution)
 

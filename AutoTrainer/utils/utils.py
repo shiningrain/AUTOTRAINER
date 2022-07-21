@@ -5,20 +5,22 @@ sys.path.append('.')
 import matplotlib.pyplot as plt
 import csv
 import numpy as np
-import keras
+from tensorflow import keras
 import datetime
 from TimeCounter import TimeHistory
-from keras.models import load_model,Sequential
-import keras.backend as K
+from tensorflow.keras.models import load_model,Sequential
+import tensorflow.keras.backend as K
 import tensorflow as tf
 from logger import Logger
 logger = Logger()
-import keras.backend as K
-from keras.callbacks import ModelCheckpoint
+import tensorflow.keras.backend as K
+from tensorflow.keras.callbacks import ModelCheckpoint
 import monitor as mn
 import pickle
 import time
 import modules as md
+import compute_gradient as cg
+
 
 default_param = {'beta_1': 1e-3,
                  'beta_2': 1e-4,
@@ -30,7 +32,10 @@ default_param = {'beta_1': 1e-3,
                  'alpha_1': 0,
                  'alpha_2': 0,
                  'alpha_3': 0,
-                 'Theta': 0.7
+                 'Theta': 0.7,
+                 'omega_1':10,
+                 'omega_2':1
+
                  }
 
 
@@ -92,15 +97,25 @@ class LossHistory(keras.callbacks.Callback):
         self.log_file=open(self.log_name,'a+')
         self.log_file.write('{},{},{},{},{}\n'.format('checktype','current_epoch','issue_list','time_usage','Describe'))
 
+        self.mid_check=True
         self.Monitor=mn.IssueMonitor(total_epoch,self.satisfied_acc,self.params,self.determine_threshold)
 
     def on_train_begin(self,logs=None):
         weights=self.model.trainable_weights# get trainable weights
-        grads = self.model.optimizer.get_gradients(self.model.total_loss, weights)
-        symb_inputs = [self.model._feed_inputs , self.model._feed_targets , self.model._feed_sample_weights,K.learning_phase()]#input,corresponding label,weight of each sample(all of them are 1),learning rate(we set it to 0)
-        self.f = K.function(symb_inputs, grads)
+        if not cg.check_version(tf.__version__):
+            try:
+                grads = self.model.optimizer.get_gradients(self.model.total_loss, weights)
+                symb_inputs = [self.model._feed_inputs , self.model._feed_targets , self.model._feed_sample_weights,K.learning_phase()]#input,corresponding label,weight of each sample(all of them are 1),learning rate(we set it to 0)
+                self.f = K.function(symb_inputs, grads)
+                self.new_computation=False
+            except:
+                self.new_computation=True
+        else:
+            self.new_computation=True
         if self.retrain==True:
             self.log_file.write('-----Using {} solution to retrain Detail can be found in the directory!-----\n'.format(self.solution))
+        
+
 
     def on_epoch_end(self,epoch,logs={}):
         self.history['loss'].append(logs.get('loss'))
@@ -111,15 +126,34 @@ class LossHistory(keras.callbacks.Callback):
             
             trainingExample = self.trainX[0:self.batch_size,...]
             trainingY=self.trainy[0:self.batch_size]
-            x, y, sample_weight = self.model._standardize_user_data(trainingExample, trainingY)
-            #output_grad = f(x + y + sample_weight)
-            self.evaluated_gradients = self.f([x , y , sample_weight,0])
+            if self.new_computation==False:
+                x, y, sample_weight = self.model._standardize_user_data(trainingExample, trainingY)
+                #output_grad = f(x + y + sample_weight)
+                self.evaluated_gradients = self.f([x , y , sample_weight,0])
+            else:
+                self.evaluated_gradients = cg.get_gradients(self.model, trainingExample, trainingY)
             gradient_list=[]
             for i in range(len(self.evaluated_gradients)):
                 if isinstance(self.evaluated_gradients[i],np.ndarray):
                     gradient_list.append(self.evaluated_gradients[i])
 
-            self.issue_list=self.Monitor.determine(self.model,self.history,gradient_list,self.checkgap)
+            if self.Monitor.feature['abnormal_loss'] or self.Monitor.feature['nan_loss'] or self.Monitor.feature['sc_accuracy']\
+                or (self.Monitor.total_epoch*0.5<=epoch and self.mid_check): #(epoch)%(self.checkgap*3): #or self.Monitor.feature['not_converge']
+                if 'activation_output' not in self.Monitor.feature.keys():
+                    #TODO:
+                    # 'activation_output':False,
+                    # 'abnormal_output':False,
+                    self.Monitor.feature['activation_output']=False
+                if 'abnormal_output' not in self.Monitor.feature.keys():
+                    self.Monitor.feature['abnormal_output']=False
+                layer_output=mn.get_layer_output(self.model, trainingExample)
+            else:
+                layer_output=None
+                
+            if self.Monitor.total_epoch*0.5<=epoch and self.mid_check:
+                self.mid_check=False
+            
+            self.issue_list=self.Monitor.determine(self.model,self.history,gradient_list,self.checkgap,layer_output)
             self.issue_list=md.filtered_issue(self.issue_list)
 
             self.evaluated_gradients=0
@@ -371,15 +405,15 @@ def model_train(model,
     checkpoint_path = os.path.join(checkpoint_dir, checkpoint_name)
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    callbacks.append(ModelCheckpoint(
-        checkpoint_path, save_best_only=True, monitor='val_accuracy', mode='max'))
+    # callbacks.append(ModelCheckpoint(
+    #     checkpoint_path, save_best_only=True, monitor='val_accuracy', mode='max'))
     callbacks.append(LossHistory(training_data=[dataset['x'], dataset['y']], model=model,determine_threshold=determine_threshold,
                                  batch_size=batch_size, save_dir=save_dir, total_epoch=iters, satisfied_acc=satisfied_acc, checktype=checktype,params=params))  # issue in lstm network
 
     callbacks_new = list(set(callbacks))
     history = model.fit(dataset['x'], dataset['y'], batch_size=batch_size, validation_data=(
         dataset['x_val'], dataset['y_val']), epochs=iters, verbose=verb, callbacks=callbacks_new)
-    check_point_model(checkpoint_dir, checkpoint_path, dataset,history)
+    # check_point_model(checkpoint_dir, checkpoint_path, dataset,history)
 
     result = history.history
     time_callback = TimeHistory()
@@ -424,7 +458,10 @@ def model_train(model,
                 pickle.dump(tmpset, f)
         else:
             print('You can find the description of the solution candidates in {}'.format('./path'))
-    return result,model, trained_path
+            #TODO:back
+            return 1,1, 1
+    # return result,model, trained_path
+    return 2,2,2
 
 
 def model_retrain(model,
@@ -443,7 +480,11 @@ def model_retrain(model,
     if isinstance(model,str):
         model_path=model
         model=load_model(model_path)
+    # model=load_model('/data/zxy/DL_tools/DL_tools/AUTOTRAINER/AutoTrainer/demo_case/Loss_Issue_Case/model_data.h5')
     model.compile(loss=config['loss'], optimizer=config['opt'], metrics=['accuracy'])
+    
+    # TODO: add savedir path read .
+    
     config['callbacks'] = [n for n in config['callbacks'] if (n.__class__!=LossHistory and n.__class__!=ModelCheckpoint)]
     config['callbacks'].append(
         LossHistory(training_data=[config['dataset']['x'], config['dataset']['y']],
@@ -462,11 +503,11 @@ def model_retrain(model,
     checkpoint_path=os.path.join(checkpoint_dir,checkpoint_name)
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    config['callbacks'].append(ModelCheckpoint(checkpoint_path, save_best_only=True, monitor='val_accuracy', mode='max'))
+    # config['callbacks'].append(ModelCheckpoint(checkpoint_path, save_best_only=True, monitor='val_accuracy', mode='max'))
     callbacks_new=list(set(config['callbacks']))
     history = model.fit(config['dataset']['x'], config['dataset']['y'],batch_size=config['batch_size'], validation_data=(config['dataset']['x_val'], config['dataset']['y_val']),\
         epochs=config['epoch'], verbose=verb,callbacks=callbacks_new)
-    check_point_model(checkpoint_dir,checkpoint_path,config,history)
+    # check_point_model(checkpoint_dir,checkpoint_path,config,history)
     issue_path = os.path.join(save_dir, 'issue_history.pkl')   
     with open(issue_path, 'rb') as f:  
         output = pickle.load(f)

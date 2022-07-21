@@ -1,11 +1,3 @@
-'''
-··  Author: your name
-Date: 2020-08-31 15:32:46
-LastEditTime: 2021-12-28 20:31:52
-LastEditors: your name
-Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
-FilePath: /Gradient_Vanish_Case/demo.py
-'''
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 import argparse
@@ -17,14 +9,14 @@ sys.path.append('../../utils')
 from utils import *
 from modules import *
 import numpy as np
-import keras
-import keras.optimizers as O
-from keras.models import load_model
+from tensorflow import keras
+import tensorflow.keras.optimizers as O
+from tensorflow.keras.models import load_model
 import argparse
 import pickle
 import itertools
 import importlib
-import keras.backend as K
+import tensorflow.keras.backend as K
 
 def get_dataset(dataset):
     data_name=dataset.split('_')[0]
@@ -43,15 +35,39 @@ def get_dataset(dataset):
     return dataset
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='OL Problem Demo Detection & Autorepair')
-    parser.add_argument('--model_path','-mp',default='./model.h5', help='model path')
-    parser.add_argument('--config_path', '-cp',default='./config.pkl', help='training configurations path') 
+    parser = argparse.ArgumentParser(description='Activation Problem Demo Detection & Autorepair')
+    parser.add_argument('--model_path','-mp',default='./model_acti.h5', help='model path')
+    parser.add_argument('--config_path', '-cp',default='./config_acti.pkl', help='training configurations path') 
     parser.add_argument('--check_interval', '-ci',default=3, help='detection interval') 
-    parser.add_argument('--result_dir', '-rd',default='./tmp/result_dir', help='The dir to store results') 
-    parser.add_argument('--log_dir', '-ld',default='./tmp/log_dir', help='The dir to store logs') 
-    parser.add_argument('--new_issue_dir', '-nd',default='./tmp/new_issue', help='The dir to store models with new problem in detection') 
-    parser.add_argument('--root_dir', '-rtd',default='./tmp', help='The root dir for other records') 
+    parser.add_argument('--result_dir', '-rd',default='./tmp_acti/result_dir', help='The dir to store results') 
+    parser.add_argument('--log_dir', '-ld',default='./tmp_acti/log_dir', help='The dir to store logs') 
+    parser.add_argument('--new_issue_dir', '-nd',default='./tmp_acti/new_issue', help='The dir to store models with new problem in detection') 
+    parser.add_argument('--root_dir', '-rtd',default='./tmp_acti', help='The root dir for other records') 
     args = parser.parse_args()
+    
+    if os.path.exists(args.root_dir):
+        import shutil
+        shutil.rmtree(args.root_dir)
+    
+    # #Initialize
+    model = Sequential()
+    model.add(Dense(50, input_dim=2, activation='relu', kernel_initializer='he_uniform'))
+    model.add(Dense(50, activation='relu', kernel_initializer='he_uniform'))
+    model.add(Dense(50, activation='relu', kernel_initializer='he_uniform'))
+    model.add(Dense(50, activation='relu', kernel_initializer='he_uniform'))
+    model.add(Dense(3, activation='relu'))
+    # model.add(Softmax())
+    model.save(args.model_path)
+    training_config={}
+    training_config['optimizer']='Adam'
+    training_config['opt_kwargs']={'lr': 0.0001}
+    training_config['batchsize']=256
+    training_config['epoch']=300
+    training_config['dataset']='simplednn_blob'
+    training_config['loss']='categorical_crossentropy'#'mean_squared_error'
+    with open(args.config_path, 'wb') as f:
+        pickle.dump(training_config, f)
+    print(1)
 
     model=load_model(args.model_path)
 
@@ -87,10 +103,10 @@ if __name__ == '__main__':
                  'Theta': 0.7,
                  'omega_1':10,
                  'omega_2':1
+
                  }
 
-    model=load_model('/data/zxy/DL_tools/DL_tools/AUTOTRAINER/AutoTrainer/demo_case/Gradient_Vanish_Case/model.h5')
+
     train_result,_,_=model_train(model=model,train_config_set=training_config,optimizer=opt,loss=loss,dataset=dataset,iters=epoch,batch_size=batch_size,\
                 callbacks=callbacks,verb=1,checktype=check_interval,autorepair=True,save_dir=save_dir,determine_threshold=1,params=params,log_dir=log_dir,\
                 new_issue_dir=new_issue_dir,root_path=root_path)
-            

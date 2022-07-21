@@ -1,3 +1,11 @@
+'''
+Author: your name
+Date: 2020-08-31 15:33:31
+LastEditTime: 2021-04-05 15:46:39
+LastEditors: Please set LastEditors
+Description: In User Settings Edit
+FilePath: /test_codes/data/zxy/DL_tools/DL_tools/AUTOTRAINER/Motivation/DyingReLU/train.py
+'''
 from keras.datasets import mnist
 from keras.models import load_model
 from keras import backend as K
@@ -23,7 +31,7 @@ epochs = 50
 train_num = 100
 opt = 'adam'
 for i in range(train_num):
-    model = load_model("minist_relu_layer=34.h5")
+    model = load_model("/data/zxy/DL_tools/DL_tools/AUTOTRAINER/Motivation/DyingReLU/minist_relu_layer=34.h5")
     model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     history = model.fit(x_train, y_train, batch_size=32,epochs=epochs,verbose=1,validation_data=(x_test, y_test))
     csv_name = "case_2_later=34_%s.csv"%i

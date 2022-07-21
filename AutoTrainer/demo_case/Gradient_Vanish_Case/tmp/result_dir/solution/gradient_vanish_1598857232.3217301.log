@@ -1,3 +1,0 @@
-solution,times,issue_list,train_result,describe
-selu,0,[],0.846666693687439,Using 'SeLU' activation in each layers' activations; Use 'lecun_uniform' as the kernel initializer.
-------------------Solved! Time used 27.02502727508545!-----------------

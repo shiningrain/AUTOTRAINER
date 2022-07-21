@@ -9,7 +9,7 @@ LastEditors: Please set LastEditors
 import numpy as np
 from sklearn.datasets import make_circles, make_blobs,make_regression
 from sklearn.preprocessing import MinMaxScaler
-from keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 import os 
 import pickle
@@ -18,9 +18,13 @@ def load_data(method='circle'):
     if method=='circle':
         X, y = make_circles(n_samples=1000, noise=0.1, random_state=1)
         # scale input data to [-1,1]
-        scaler = MinMaxScaler(feature_range=(-1, 1))
-        X = scaler.fit_transform(X)
+        
+        # scaler = MinMaxScaler(feature_range=(-1, 1))
+        # X = scaler.fit_transform(X)
+        
         # split into train and test
+        X=X*100
+        
         n_train = 700
         x, x_val= X[:n_train, :], X[n_train:, :]
         y, y_val = y[:n_train], y[n_train:]
@@ -33,6 +37,7 @@ def load_data(method='circle'):
     elif method=='blob':
         X, y = make_blobs(n_samples=1000, centers=3, n_features=2, cluster_std=2, random_state=2)
         # one hot encode output variable
+        X=X*100
         y = to_categorical(y)
         # split into train and test
         n_train = 700
@@ -46,7 +51,8 @@ def load_data(method='circle'):
         # y_val=dataset['y_val']
     elif method=='reg':
         X, y = make_regression(n_samples=1000, n_features=20, noise=0.1, random_state=1)
-    # split into train and test
+        # split into train and test
+        X=X*100
         n_train = 500
         x, x_val = X[:n_train, :], X[n_train:, :]
         y, y_val = y[:n_train], y[n_train:]
@@ -61,4 +67,4 @@ def load_data(method='circle'):
     return (x,y),(x_val,y_val)
 
 def preprocess(x):
-    return x
+    return x/100

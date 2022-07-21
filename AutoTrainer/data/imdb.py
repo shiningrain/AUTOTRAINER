@@ -7,8 +7,8 @@
 @FilePath: /AutoGeneration/data/zxy/DL_tools/DL_tools/data/imdb.py
 '''
 import numpy as np
-from keras.datasets import imdb
-from keras.preprocessing import sequence
+from tensorflow.keras.datasets import imdb
+from tensorflow.keras.preprocessing import sequence
 
 def load_data(max_features=10000):
     (x, y), (x_val,y_val) = imdb.load_data(num_words=max_features)

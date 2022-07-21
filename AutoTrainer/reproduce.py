@@ -1,4 +1,13 @@
+'''
+Author: your name
+Date: 2020-09-16 11:01:13
+LastEditTime: 2021-08-27 07:32:08
+LastEditors: your name
+Description: In User Settings Edit
+FilePath: /AutoTrainer/reproduce.py
+'''
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 import argparse
 import sys
 sys.setrecursionlimit(1000000)
@@ -51,7 +60,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_path','-mp',default='./demo_case/Gradient_Vanish_Case/model.h5', help='model path')
     parser.add_argument('--config_path', '-cp',default='./demo_case/Gradient_Vanish_Case/config.pkl', help='training configurations path') #
     parser.add_argument('--check_interval', '-ci',default=3, help='detection interval') 
-    parser.add_argument('--result_dir', '-rd',default='./tmp/result_dir', help='The dir to store results') 
+    parser.add_argument('--result_dir', '-rd',default='./tmp/result_dir_1', help='The dir to store results') 
     parser.add_argument('--log_dir', '-ld',default='./tmp/log_dir', help='The dir to store logs') 
     parser.add_argument('--new_issue_dir', '-nd',default='./tmp/new_issue', help='The dir to store models with new problem in detection') 
     parser.add_argument('--root_dir', '-rtd',default='./tmp', help='The root dir for other records') 
@@ -64,7 +73,7 @@ if __name__ == '__main__':
     opt_cls = getattr(O, training_config['optimizer'])
     opt = opt_cls(**training_config['opt_kwargs'])
     batch_size=training_config['batchsize']
-    epoch=training_config['epoch']
+    epoch=100#training_config['epoch']
     loss=training_config['loss']
     dataset=get_dataset(training_config['dataset'])
     if 'callbacks' not in training_config.keys():
@@ -88,7 +97,9 @@ if __name__ == '__main__':
                  'alpha_1': 0,
                  'alpha_2': 0,
                  'alpha_3': 0,
-                 'Theta': 0.6
+                 'Theta': 0.6,
+                 'omega_1':10,
+                 'omega_2':1
                  }
 
 
