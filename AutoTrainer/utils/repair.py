@@ -39,14 +39,14 @@ def has_NaN(output):
     return result
 
 def reload_model(model,path=tmp_model_path):
-    path=os.path.abspath(path)
-    if not os.path.exists(path):
-        os.makedirs(path)
-    model_name='model_{}.h5'.format(str(os.getpid()))
-    path=os.path.join(path,model_name)
-    model.save(path)
-    model=load_model(path)
-    os.remove(path)
+    # path=os.path.abspath(path)
+    # if not os.path.exists(path):
+    #     os.makedirs(path)
+    # model_name='model_{}.h5'.format(str(os.getpid()))
+    # path=os.path.join(path,model_name)
+    # model.save(path)
+    # model=load_model(path)
+    # os.remove(path)
     return model
 
 def random_kwargs_list(method='gradient_clip',clipvalue=10):
@@ -101,7 +101,7 @@ def replace_intermediate_layer_in_keras(model, layer_id, new_layer):
     try:
         new_model = Model(input=layers[0].input, output=x)
     except:
-        new_model = Model(layers[0].input, x)
+        new_model = Model(inputs=layers[0].input, outputs=x)
     # new_model = Model(layers[0].input, x)
     return new_model
 
@@ -204,6 +204,8 @@ def modify_activations(model,activation_name,method='normal'):#https://github.co
                         new_model.add(new_layer)
                     elif 're_lu' not in model.layers[layer].get_config()['name']:   
                         new_model.add(model.layers[layer])
+        input_shape=model.input_shape
+        new_model.build(input_shape)# for tf2.3 version
         model=new_model
     if method=='special':# For leakyrelu and others
         i=0
@@ -288,7 +290,7 @@ def Dropout_network(model,incert_layer=Insert_Layers,rate=0.25):
 def BN_network(model,incert_layer=Insert_Layers):
     layers_num = len(model.layers)
     i=0
-    while(i<layers_num-1):#the last layer don't add BN layer
+    while(i<layers_num-2):#the last layer don't add BN layer
         for j in incert_layer:
             if j in model.layers[i].get_config()['name']:
                 if model.layers[i+1].__class__!=getattr(L,'BatchNormalization'):
@@ -433,6 +435,8 @@ def reconstruct_model(model):
         config=copy.deepcopy(model.layers[layer].get_config())
         new_layer=model.layers[layer].__class__(**config)
         new_model.add(new_layer)
+    input_shape=model.input_shape
+    new_model.build(input_shape)# for tf2.3 version
     # model.save('./tmp.h5')
     # new_model.save('./tmp1.h5')
     return new_model
@@ -444,8 +448,8 @@ def op_loss(model, config, issue, j,config_set):
     new_loss=select_loss(model,config['loss'])
     config['loss']=new_loss
     config_set['loss']=new_loss
-    new_model=reconstruct_model(model) 
-    return new_model, config,describe, False,config_set
+    # new_model=reconstruct_model(model)
+    return model, config,describe, False,config_set
 
 def op_activation(model, config, issue, j,config_set):
     describe=0
@@ -461,8 +465,8 @@ def op_preprocess(model, config, issue, j,config_set):
     data_set=config['dataset']
     data_set['x']=preprocess(data_set['x'])
     data_set['x_val']=preprocess(data_set['x_val'])
-    new_model=reconstruct_model(model) 
-    return new_model, config,describe, False,config_set
+    # new_model=reconstruct_model(model)
+    return model, config,describe, False,config_set
 
 def op_gradient(model, config, issue, j,config_set):  #m
     describe=0
@@ -688,7 +692,7 @@ def repair_default(model,config,issue,j,config_set):
     os._exit(0)
 
 
-if __name__=='__main__':
-    model=load_model('/data/zxy/DL_tools/DL_tools/AUTOTRAINER/AutoTrainer/demo_case/Gradient_Vanish_Case/model.h5')
-    new_model=modify_last_activations(model,'softmax')
-    print(1)
+# if __name__=='__main__':
+#     model=load_model('/data/zxy/DL_tools/DL_tools/AUTOTRAINER/AutoTrainer/demo_case/Gradient_Vanish_Case/model.h5')
+#     new_model=modify_last_activations(model,'softmax')
+#     print(1)

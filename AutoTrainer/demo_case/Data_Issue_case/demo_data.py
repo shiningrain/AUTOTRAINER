@@ -31,8 +31,8 @@ def get_dataset(dataset):
         (x, y), (x_val, y_val) = data.load_data()
     preprocess_func = data.preprocess
     dataset={}
-    # dataset['x']=preprocess_func(x)
-    # dataset['x_val']=preprocess_func(x_val)
+    dataset['x']=preprocess_func(x)
+    dataset['x_val']=preprocess_func(x_val)
     dataset['x']=x
     dataset['x_val']=x_val
     dataset['y']=to_categorical(y, 10)
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     model.add(Conv2D(filters = 16,
             kernel_size = (3, 3),
             padding = 'valid',
-            input_shape = (32, 32, 3),
+            input_shape = (28, 28, 1),
             activation = 'relu',kernel_initializer=init))
     model.add(MaxPooling2D(pool_size = (2, 2)))
     model.add(Dropout(0.25))
@@ -88,8 +88,8 @@ if __name__ == '__main__':
     training_config['optimizer']='Adam'
     training_config['opt_kwargs']={'lr': 0.001}
     training_config['batchsize']=32
-    training_config['epoch']=15
-    training_config['dataset']='cifar10'
+    training_config['epoch']=10
+    training_config['dataset']='MNIST'
     training_config['loss']='categorical_crossentropy'#'mean_squared_error'
     with open(args.config_path, 'wb') as f:
         pickle.dump(training_config, f)

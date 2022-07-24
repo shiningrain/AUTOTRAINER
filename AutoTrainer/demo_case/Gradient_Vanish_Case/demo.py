@@ -17,14 +17,14 @@ sys.path.append('../../utils')
 from utils import *
 from modules import *
 import numpy as np
-import keras
-import keras.optimizers as O
-from keras.models import load_model
+from tensorflow import keras
+import tensorflow.keras.optimizers as O
+from tensorflow.keras.models import load_model
 import argparse
 import pickle
 import itertools
 import importlib
-import keras.backend as K
+import tensorflow.keras.backend as K
 
 def get_dataset(dataset):
     data_name=dataset.split('_')[0]
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     opt = opt_cls(**training_config['opt_kwargs'])
     batch_size=training_config['batchsize']
     epoch=training_config['epoch']
-    loss=training_config['loss']
+    loss='categorical_crossentropy'#training_config['loss']
     dataset=get_dataset(training_config['dataset'])
     if 'callbacks' not in training_config.keys():
         callbacks=[]
@@ -89,7 +89,7 @@ if __name__ == '__main__':
                  'omega_2':1
                  }
 
-    model=load_model('/data/zxy/DL_tools/DL_tools/AUTOTRAINER/AutoTrainer/demo_case/Gradient_Vanish_Case/model.h5')
+    model=load_model(args.model_path)
     train_result,_,_=model_train(model=model,train_config_set=training_config,optimizer=opt,loss=loss,dataset=dataset,iters=epoch,batch_size=batch_size,\
                 callbacks=callbacks,verb=1,checktype=check_interval,autorepair=True,save_dir=save_dir,determine_threshold=1,params=params,log_dir=log_dir,\
                 new_issue_dir=new_issue_dir,root_path=root_path)

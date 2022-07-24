@@ -8,7 +8,7 @@ import numpy as np
 from tensorflow import keras
 import datetime
 from TimeCounter import TimeHistory
-from tensorflow.keras.models import load_model,Sequential
+from tensorflow.keras.models import load_model
 import tensorflow.keras.backend as K
 import tensorflow as tf
 from logger import Logger
@@ -118,6 +118,16 @@ class LossHistory(keras.callbacks.Callback):
 
 
     def on_epoch_end(self,epoch,logs={}):
+        # if self.retrain:
+        #     for i in range(len(self.model.layers)):
+        #         self.model.layers[i]._handle_name = self.model.layers[i]._name + "_" + str(i)
+        #     for i in range(len(self.model.weights)):
+        #         self.model.weights[i]._handle_name = self.model.weights[i].name + "_" + str(i)
+        #     for i, var in enumerate(self.model.optimizer.weights):
+        #         name = 'variable{}'.format(i)
+        #         self.model.optimizer.weights[i] = tf.Variable(var, name=name)
+        
+        
         self.history['loss'].append(logs.get('loss'))
         self.history['acc'].append(logs.get('accuracy'))
         self.history['val_loss'].append(logs.get('val_loss'))
@@ -322,6 +332,17 @@ def pack_train_config(opt,loss,dataset,epoch,batch_size,callbacks):
     config['callbacks']=callbacks
     return config
 
+def rename_model_weights(model):
+    # reference: https://stackoverflow.com/questions/64118599. rename model weights to fix the bugs.
+    for i in range(len(model.layers)):
+        model.layers[i]._handle_name = model.layers[i]._name + "_" + str(i)
+    for i in range(len(model.weights)):
+        model.weights[i]._handle_name = model.weights[i].name + "_" + str(i)
+    for i, var in enumerate(model.optimizer.weights):
+        name = 'variable{}'.format(i)
+        model.optimizer.weights[i] = tf.Variable(var, name=name)
+    return model
+
 def model_train(model,
                 train_config_set,
                 optimizer,
@@ -405,15 +426,15 @@ def model_train(model,
     checkpoint_path = os.path.join(checkpoint_dir, checkpoint_name)
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    # callbacks.append(ModelCheckpoint(
-    #     checkpoint_path, save_best_only=True, monitor='val_accuracy', mode='max'))
+    callbacks.append(ModelCheckpoint(
+        checkpoint_path, save_best_only=True, monitor='val_accuracy', mode='max'))
     callbacks.append(LossHistory(training_data=[dataset['x'], dataset['y']], model=model,determine_threshold=determine_threshold,
                                  batch_size=batch_size, save_dir=save_dir, total_epoch=iters, satisfied_acc=satisfied_acc, checktype=checktype,params=params))  # issue in lstm network
 
     callbacks_new = list(set(callbacks))
     history = model.fit(dataset['x'], dataset['y'], batch_size=batch_size, validation_data=(
         dataset['x_val'], dataset['y_val']), epochs=iters, verbose=verb, callbacks=callbacks_new)
-    # check_point_model(checkpoint_dir, checkpoint_path, dataset,history)
+    check_point_model(checkpoint_dir, checkpoint_path, dataset,history)
 
     result = history.history
     time_callback = TimeHistory()
@@ -503,11 +524,14 @@ def model_retrain(model,
     checkpoint_path=os.path.join(checkpoint_dir,checkpoint_name)
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    # config['callbacks'].append(ModelCheckpoint(checkpoint_path, save_best_only=True, monitor='val_accuracy', mode='max'))
+    config['callbacks'].append(ModelCheckpoint(checkpoint_path, save_best_only=True, monitor='val_accuracy', mode='max'))
     callbacks_new=list(set(config['callbacks']))
     history = model.fit(config['dataset']['x'], config['dataset']['y'],batch_size=config['batch_size'], validation_data=(config['dataset']['x_val'], config['dataset']['y_val']),\
         epochs=config['epoch'], verbose=verb,callbacks=callbacks_new)
-    # check_point_model(checkpoint_dir,checkpoint_path,config,history)
+    check_point_model(checkpoint_dir,checkpoint_path,config,history)
+    
+    model=rename_model_weights(model)
+    
     issue_path = os.path.join(save_dir, 'issue_history.pkl')   
     with open(issue_path, 'rb') as f:  
         output = pickle.load(f)

@@ -6,7 +6,7 @@ import numpy as np
 from tensorflow import keras
 import datetime
 from TimeCounter import TimeHistory
-from tensorflow.keras.models import load_model,Sequential
+from tensorflow.keras.models import load_model
 import tensorflow.keras.backend as K
 import tensorflow as tf
 from logger import Logger
@@ -367,7 +367,7 @@ class IssueMonitor:
                     self.issue_list.append('explode')
                 elif (self.feature['vanish_gradient']>=self.determine_threshold): 
                     self.issue_list.append('vanish')
-                elif self.feature['sc_accuracy'] and not self.feature['abnormal_output']: 
+                elif (self.feature['not_converge'] and self.feature['sc_accuracy']) and not self.feature['abnormal_output']: 
                     self.issue_list.append('not_converge')
             # if self.feature['test_turn_bad'] + self.feature['test_not_well']>self.determine_threshold:
             #     self.issue_list.append('overfit')

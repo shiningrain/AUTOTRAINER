@@ -9,7 +9,7 @@ from tensorflow import keras
 import datetime
 import repair as rp
 from TimeCounter import TimeHistory
-from tensorflow.keras.models import load_model,Sequential
+from tensorflow.keras.models import load_model
 import tensorflow.keras.backend as K
 import tensorflow as tf
 from logger import Logger

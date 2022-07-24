@@ -3,6 +3,8 @@ from tensorflow.keras.datasets import mnist
 
 def load_data():
     (x, y), (x_val, y_val) = mnist.load_data()
+    x_val = x_val.reshape(x_val.shape[0], 28, 28, 1)
+    x = x.reshape(x.shape[0], 28, 28, 1)
     return (x, y), (x_val, y_val)
 
 def preprocess(x, bk='tensorflow'):
