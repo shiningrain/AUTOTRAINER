@@ -423,7 +423,7 @@ class Repair_Module:
                     model=seed_model
                 train_config=config_bk.copy()
                 config_set=copy.deepcopy(self.config_set_bk)
-                tmp_model,config,modify_describe,_break,new_config_set=notify_result(tmp_sol,model,train_config,issue_type,j,config_set)
+                model,config,modify_describe,_break,new_config_set=notify_result(tmp_sol,model,train_config,issue_type,j,config_set)
                 if _break: break#  the solution has already been used in the source model.
                 print('-------------Solution {} has been used, waiting for retrain.-----------'.format(tmp_sol))
                 
@@ -432,7 +432,7 @@ class Repair_Module:
                 repair_time=time.time()-start_time
                 
                 # TODO:load previous acc as satisfy acc
-                new_model,new_issue_list,train_result,retrain_history=utils.model_retrain(tmp_model,config,satisfied_acc=self.satisfied_acc,\
+                new_model,new_issue_list,train_result,retrain_history=utils.model_retrain(model,config,satisfied_acc=self.satisfied_acc,\
                     retrain_dir=tmp_dir,save_dir=save_dir,solution=tmp_sol,determine_threshold=self.determine_threshold,checktype=self.checktype)
 
                 # new_issue_list=['overfit']

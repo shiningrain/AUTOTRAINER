@@ -128,7 +128,7 @@ def layer_issue(
     del other_layer[-1]
     
     sum_output_layer=np.absolute(output_layer[0]).sum(1)
-    if max(sum_output_layer)>(acti_threshold+0.1):
+    if max(sum_output_layer)>(acti_threshold+0.1) or has_NaN(sum_output_layer):
         feature_dict['activation_output']=True
         
     for other in other_layer:
@@ -354,6 +354,8 @@ class IssueMonitor:
                 # TODO: improve loss issue judgement
                 if self.feature['abnormal_loss']:
                     self.issue_list.append('loss_issue')
+                elif self.feature['activation_output']:
+                    self.issue_list.append('activation_issue')
                 elif self.feature['nan_weight'] or self.feature['nan_gradient']:
                     self.issue_list.append('explode')
             if self.feature['not_converge']  or self.feature['sc_accuracy']:    
@@ -383,6 +385,6 @@ class IssueMonitor:
             if self.issue_list!=[]:
                 print(1)
                 # TODO: let abnormal be the first, with the highest priority.
-        elif layer_output==None and self.feature['nan_loss']:
+        elif layer_output!=None and self.feature['nan_loss']:
             if self.feature['nan_weight'] or self.feature['nan_gradient']:
                 self.issue_list.append('explode')

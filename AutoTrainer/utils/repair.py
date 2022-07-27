@@ -39,14 +39,15 @@ def has_NaN(output):
     return result
 
 def reload_model(model,path=tmp_model_path):
-    # path=os.path.abspath(path)
-    # if not os.path.exists(path):
-    #     os.makedirs(path)
-    # model_name='model_{}.h5'.format(str(os.getpid()))
-    # path=os.path.join(path,model_name)
-    # model.save(path)
-    # model=load_model(path)
-    # os.remove(path)
+    # reload model to clear the effect from the nan loss
+    path=os.path.abspath(path)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    model_name='model_{}.h5'.format(str(os.getpid()))
+    path=os.path.join(path,model_name)
+    model.save(path)
+    model=load_model(path)
+    os.remove(path)
     return model
 
 def random_kwargs_list(method='gradient_clip',clipvalue=10):
@@ -85,7 +86,7 @@ def insert_intermediate_layer_in_keras(model, layer_id, new_layer):
     try:
         new_model = Model(input=layers[0].input, output=x)
     except:
-        new_model = Model(layers[0].input, x)
+        new_model = Model(inputs=layers[0].input, outputs=x)
     # new_model = Model(layers[0].input, x)
     return new_model
 
@@ -132,7 +133,7 @@ def modify_initializer(model,b_initializer=None,k_initializer=None):
                 new_config['bias_initializer']=b_initializer
                 new_layer=model.layers[i].__class__(**new_config)
                 model=replace_intermediate_layer_in_keras(model,i,new_layer)'''
-    model=reload_model(model)
+    # model=reload_model(model)
     return model
 
 def not_dense_acti(model,i):
@@ -230,14 +231,17 @@ def modify_activations(model,activation_name,method='normal'):#https://github.co
                         layers_num+=1
             i+=1
         model.summary()
+    reload_sign=False
     for i in range(len(model.layers)):
         for j in range(len(model.layers[i].get_weights())):
             if has_NaN(model.layers[i].get_weights()[j]):
+                reload_sign=True
                 new_config=copy.deepcopy(model.layers[i].get_config())
                 new_layer=model.layers[i].__class__(**new_config)
                 model=replace_intermediate_layer_in_keras(model,i,new_layer)
                 break
-    model=reload_model(model)
+    if reload_sign:
+        model=reload_model(model)
     return model
 
 # model=load_model('/data/zxy/DL_tools/1Autokeras/test_codes/relu/b5e3c487/model.h5')
@@ -305,7 +309,7 @@ def BN_network(model,incert_layer=Insert_Layers):
 
 
 def Gaussian_Noise(model,stddev=0.1):
-    start_layers=['conv','lstm','rnn','gru','dense']
+    start_layers=['conv','lstm','rnn','gru','dense']   
     for i in range(len(model.layers)):
         for j in range(len(start_layers)):
             if start_layers[j] in model.layers[i].name:
@@ -332,7 +336,7 @@ def DNN_skip_connect(model,layer_name='dense'):#only activation
     try:
         new_model = Model(input=layers[0].input, output=x)
     except:
-        new_model = Model(layers[0].input, x)
+        new_model = Model(inputs=layers[0].input, outputs=x)
     return new_model
 
 def modify_optimizer(optimizer,kwargs_list,method='lr'):
@@ -430,16 +434,18 @@ def preprocess(data_array):
     return data_array
 
 def reconstruct_model(model):
-    new_model=Sequential()
-    for layer in range(len(model.layers)): # go through until last layer
-        config=copy.deepcopy(model.layers[layer].get_config())
-        new_layer=model.layers[layer].__class__(**config)
-        new_model.add(new_layer)
-    input_shape=model.input_shape
-    new_model.build(input_shape)# for tf2.3 version
-    # model.save('./tmp.h5')
-    # new_model.save('./tmp1.h5')
-    return new_model
+    reload_sign=False
+    for i in range(len(model.layers)):
+        for j in range(len(model.layers[i].get_weights())):
+            if has_NaN(model.layers[i].get_weights()[j]):
+                reload_sign=True
+                new_config=copy.deepcopy(model.layers[i].get_config())
+                new_layer=model.layers[i].__class__(**new_config)
+                model=replace_intermediate_layer_in_keras(model,i,new_layer)
+                break
+    if reload_sign:
+        model=reload_model(model)
+    return model
 
 ##------------------------add solution describe here-----------------------------
 
@@ -448,24 +454,24 @@ def op_loss(model, config, issue, j,config_set):
     new_loss=select_loss(model,config['loss'])
     config['loss']=new_loss
     config_set['loss']=new_loss
-    # new_model=reconstruct_model(model)
+    model=reconstruct_model(model)
     return model, config,describe, False,config_set
 
 def op_activation(model, config, issue, j,config_set):
     describe=0
-    tmp_model = model
-    activation_name=select_acti(tmp_model)
+    activation_name=select_acti(model)
     if activation_name=='sigmoid' and 'entropy' not in config['loss']:
         activation_name='linear' # for regression problem
-    tmp_model = modify_last_activations(model, activation_name)
-    return tmp_model, config,describe, False,config_set
+    model = modify_last_activations(model, activation_name)
+    model=reconstruct_model(model)
+    return model, config,describe, False,config_set
 
 def op_preprocess(model, config, issue, j,config_set):
     describe=0
     data_set=config['dataset']
     data_set['x']=preprocess(data_set['x'])
     data_set['x_val']=preprocess(data_set['x_val'])
-    # new_model=reconstruct_model(model)
+    model=reconstruct_model(model)
     return model, config,describe, False,config_set
 
 def op_gradient(model, config, issue, j,config_set):  #m
