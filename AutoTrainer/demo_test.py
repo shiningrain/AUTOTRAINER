@@ -31,7 +31,7 @@ def get_dataset(dataset_name):
     if 'nopre' in dataset_name:
         dataset_name=dataset_name.split('-')[0]
         preprocess=False
-    data = importlib.import_module('{}'.format(data_name.lower()), package='data')
+    data = importlib.import_module('{}'.format(data_name.split('-').lower()), package='data')
     if data_name=='simplednn':
         choice=dataset_name.split('_')[-1]
         (x, y), (x_val, y_val) = data.load_data(method=choice)
