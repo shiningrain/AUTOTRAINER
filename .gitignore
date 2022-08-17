@@ -36,7 +36,8 @@
 ehthumbs.db
 Thumbs.db
 
-*.h5
+# *.h5
+*.py*
 *tmp*
 *_rnn.py
 *_rnn.pkl
