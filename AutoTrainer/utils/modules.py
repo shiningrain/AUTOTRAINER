@@ -30,6 +30,7 @@ from tensorflow.keras.layers import Lambda
 from tensorflow.keras.initializers import he_uniform,glorot_uniform,zeros
 from tensorflow.keras.optimizers import SGD, Adam, Adamax
 from tensorflow.keras.callbacks import ReduceLROnPlateau
+import shutil
 
 solution_evaluation = {
         'gradient' : {'modify':0, 'memory':False},
@@ -56,7 +57,7 @@ solution_evaluation = {
 problem_evaluation = {# please use the priority order here
     'activation_issue':3,
     'loss_issue':3,
-    'abnormal_data':3,
+    'abnormal_data':4,
     'vanish': 2,
     'explode': 2,
     'relu': 2,
@@ -290,13 +291,13 @@ class Repair_Module:
                         #TODO: solve this problem
                         print('Tensorflow Save Model Failed!! Save Without Optimizer Now!!! More Details ref to https://github.com/tensorflow/tensorflow/issues/27688')
                         self.model.save(model_path, include_optimizer=False)
-                        # optimizer_config=
-                        optimizer_path=model_path.replace('.h5','_optimizer.pkl')
-                        optimizer_config={}
-                        optimizer_config['optimizer']=self.model.optimizer.get_config()
-                        optimizer_config['loss']=self.model.loss
-                        with open(optimizer_path, 'wb') as f:
-                            pickle.dump(optimizer_config, f)
+                        # # optimizer_config=
+                        # optimizer_path=model_path.replace('.h5','_optimizer.pkl')
+                        # optimizer_config={}
+                        # optimizer_config['optimizer']=self.model.optimizer.get_config()
+                        # optimizer_config['loss']=self.model.loss
+                        # with open(optimizer_path, 'wb') as f:
+                        #     pickle.dump(optimizer_config, f)
                     
                     tmpset={}
                     tmpset['time']=time.time()-self.initial_time
@@ -331,6 +332,9 @@ class Repair_Module:
                         new_save_dir=os.path.join(new_dir,'monitor_tool_log')
                         if not os.path.exists(new_save_dir):
                             os.makedirs(new_save_dir)
+                        
+                        shutil.copyfile(os.path.join(os.path.dirname(tmp_dir),'wgt.npy'),os.path.join(new_save_dir,'wgt.npy'))
+                        
                         common_log_path=os.path.join(new_log_dir,'common_log_history.pkl')
 
                         common_log_history={}
@@ -424,6 +428,19 @@ class Repair_Module:
                 train_config=config_bk.copy()
                 config_set=copy.deepcopy(self.config_set_bk)
                 model,config,modify_describe,_break,new_config_set=notify_result(tmp_sol,model,train_config,issue_type,j,config_set)
+                
+                # reload weights to avoid the effect of previous poison weights
+                if issue_type=='activation_issue' or issue_type=='loss_issue' or issue_type=='abnormal_data':
+                    origin_weights=np.load(os.path.join(os.path.dirname(tmp_dir),'wgt.npy'),allow_pickle=True)
+                    model.set_weights(origin_weights)
+                # if  issue_type=='abnormal_data':
+                #     # reload model
+                #     tmp_dir_list=os.listdir(case_name)
+                #     for tmd in tmp_dir_list:
+                #         if '.h5' in tmd:
+                #             model=load_model(os.path.join(case_name,tmd))
+                #             break
+                
                 if _break: break#  the solution has already been used in the source model.
                 print('-------------Solution {} has been used, waiting for retrain.-----------'.format(tmp_sol))
                 

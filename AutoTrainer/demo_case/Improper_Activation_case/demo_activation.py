@@ -11,7 +11,7 @@ from modules import *
 import numpy as np
 from tensorflow import keras
 import tensorflow.keras.optimizers as O
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model,Sequential
 import argparse
 import pickle
 import itertools

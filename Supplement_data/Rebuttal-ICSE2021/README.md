@@ -1,5 +1,5 @@
 # The Detailed Rebuttal
-The detailed rebuttal for reviews is shown in [`Rebuttal.md`](./Rebuttal.md).
+The detailed rebuttal for ICSE reviews is shown in [`Rebuttal.md`](./Rebuttal.md).
 
 # The Required Experiments and Results
 

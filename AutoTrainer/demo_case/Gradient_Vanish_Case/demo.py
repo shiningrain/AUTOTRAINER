@@ -61,7 +61,7 @@ if __name__ == '__main__':
     opt = opt_cls(**training_config['opt_kwargs'])
     batch_size=training_config['batchsize']
     epoch=training_config['epoch']
-    loss='categorical_crossentropy'#training_config['loss']
+    loss=training_config['loss']
     dataset=get_dataset(training_config['dataset'])
     if 'callbacks' not in training_config.keys():
         callbacks=[]

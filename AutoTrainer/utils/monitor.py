@@ -48,8 +48,16 @@ def get_layer_output(model, inputs):
     layer_dict = dict([(layer.name, layer) for layer in model.layers])
     outputs = []
     for layer in model.layers:
+        if 'embed' in layer.name:
+            outputs = []
         f = K.function([model.input], [layer.output])
         outputs.append(f([inputs,  K.learning_phase()]))
+    
+    # new_output=[]
+    # for l in range(len(model.layers)):
+    #     if 'embed' in model.layers[-l-1].name:
+    #         break
+    #     new_output.insert(0,outputs[-l-1])    
     return outputs
 
 def get_weights(model,x,batch_size):
@@ -76,14 +84,19 @@ def max_delta_acc(acc_list):
     return max_delta
 
 def gradient_norm(gradient_list):
-    assert len(gradient_list)%2==0
+    # assert len(gradient_list)%2==0
     norm_kernel_list=[]
     norm_bias_list=[]
-    for i in range(int(len(gradient_list)/2)):
-        # average_kernel_list.append(np.mean(np.abs(gradient_list[2*i])))
-        # average_bias_list.append(np.mean(np.abs(gradient_list[2*i+1])))
-        norm_kernel_list.append(np.linalg.norm(np.array(gradient_list[2*i])))
-        norm_bias_list.append(np.linalg.norm(np.array(gradient_list[2*i+1])))
+    # for i in range(int(len(gradient_list)/2)):
+    #     # average_kernel_list.append(np.mean(np.abs(gradient_list[2*i])))
+    #     # average_bias_list.append(np.mean(np.abs(gradient_list[2*i+1])))
+    #     norm_kernel_list.append(np.linalg.norm(np.array(gradient_list[2*i])))
+    #     norm_bias_list.append(np.linalg.norm(np.array(gradient_list[2*i+1])))
+    for i in range(len(gradient_list)):
+        if len(gradient_list[i].shape)==1:
+            norm_bias_list.append(np.linalg.norm(np.array(gradient_list[i])))
+        else:
+            norm_kernel_list.append(np.linalg.norm(np.array(gradient_list[i])))
     return norm_kernel_list,norm_bias_list
 
 
@@ -205,7 +218,7 @@ def weights_issue(feature_dict,weights,last_weights,threshold_large=5,threshold_
 
 def gradient_issue(feature_dict,gradient_list,threshold_low=1e-3,threshold_low_1=1e-4,threshold_high=70,threshold_die_1=0.7):
 
-    [norm_kernel,avg_bias,gra_rate],\
+    [norm_kernel,normal_bias,gra_rate],\
                 [total_ratio,kernel_ratio,bias_ratio,max_zero]\
                     =gradient_message_summary(gradient_list)
 
@@ -244,14 +257,14 @@ def loss_function_issue(feature_dict,loss_function,output_shape,activation):
         #     feature_dict['improper_loss']=False
         # elif activation=='linear' and 'mean' in loss_function:
         #     feature_dict['improper_loss']=False
-        if output_shape==1 and 'binary' in loss_function:
+        if output_shape<=2 and 'binary' in loss_function:
             feature_dict['improper_loss']=False
-        elif output_shape>1 and 'categorical' in loss_function:
+        elif output_shape>2 and 'categorical' in loss_function:
             feature_dict['improper_loss']=False
         else:
             feature_dict['improper_loss']=True
         if not feature_dict['improper_loss']:
-            if activation!='sigmoid' and 'binary' in loss_function:
+            if activation!='sigmoid' and 'binary' in loss_function and output_shape!=2:
                 feature_dict['activation_output']=True
             elif activation!='softmax' and 'categorical' in loss_function:
                 feature_dict['activation_output']=True

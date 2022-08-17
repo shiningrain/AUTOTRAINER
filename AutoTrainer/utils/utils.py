@@ -103,13 +103,13 @@ class LossHistory(keras.callbacks.Callback):
     def on_train_begin(self,logs=None):
         weights=self.model.trainable_weights# get trainable weights
         if not cg.check_version(tf.__version__):
-            try:
-                grads = self.model.optimizer.get_gradients(self.model.total_loss, weights)
-                symb_inputs = [self.model._feed_inputs , self.model._feed_targets , self.model._feed_sample_weights,K.learning_phase()]#input,corresponding label,weight of each sample(all of them are 1),learning rate(we set it to 0)
-                self.f = K.function(symb_inputs, grads)
-                self.new_computation=False
-            except:
-                self.new_computation=True
+            # try:
+            grads = self.model.optimizer.get_gradients(self.model.total_loss, weights)
+            symb_inputs = [self.model._feed_inputs , self.model._feed_targets , self.model._feed_sample_weights,K.learning_phase()]#input,corresponding label,weight of each sample(all of them are 1),learning rate(we set it to 0)
+            self.f = K.function(symb_inputs, grads)
+            self.new_computation=False
+            # except:
+            #     self.new_computation=True
         else:
             self.new_computation=True
         if self.retrain==True:
@@ -355,7 +355,7 @@ def model_train(model,
                 root_path,
                 new_issue_dir,
                 verb=0,
-                determine_threshold=1,
+                determine_threshold=3,
                 save_dir='./tool_log',
                 checktype='epoch_3',
                 autorepair=True,
@@ -432,6 +432,10 @@ def model_train(model,
                                  batch_size=batch_size, save_dir=save_dir, total_epoch=iters, satisfied_acc=satisfied_acc, checktype=checktype,params=params))  # issue in lstm network
 
     callbacks_new = list(set(callbacks))
+    if autorepair:
+        tmp_weights=model.get_weights()
+        np.save(os.path.join(save_dir,'wgt.npy'),tmp_weights)
+    
     history = model.fit(dataset['x'], dataset['y'], batch_size=batch_size, validation_data=(
         dataset['x_val'], dataset['y_val']), epochs=iters, verbose=verb, callbacks=callbacks_new)
     check_point_model(checkpoint_dir, checkpoint_path, dataset,history)
@@ -439,6 +443,7 @@ def model_train(model,
     result = history.history
     time_callback = TimeHistory()
     log_path = os.path.join(log_dir, 'log.csv')
+    trained_path=None
     if 'val_loss' in result.keys():
         time_callback.write_to_csv(result, log_path, iters)
 
@@ -530,7 +535,10 @@ def model_retrain(model,
         epochs=config['epoch'], verbose=verb,callbacks=callbacks_new)
     check_point_model(checkpoint_dir,checkpoint_path,config,history)
     
-    model=rename_model_weights(model)
+    try:
+        model=rename_model_weights(model)
+    except:
+        pass
     
     issue_path = os.path.join(save_dir, 'issue_history.pkl')   
     with open(issue_path, 'rb') as f:  

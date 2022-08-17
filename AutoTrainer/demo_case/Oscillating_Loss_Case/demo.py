@@ -75,7 +75,9 @@ if __name__ == '__main__':
                  'alpha_1': 0,
                  'alpha_2': 0,
                  'alpha_3': 0,
-                 'Theta': 0.6
+                 'Theta': 0.7,
+                 'omega_1':10,
+                 'omega_2':1
                  }
 
 

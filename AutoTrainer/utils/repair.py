@@ -133,7 +133,7 @@ def modify_initializer(model,b_initializer=None,k_initializer=None):
                 new_config['bias_initializer']=b_initializer
                 new_layer=model.layers[i].__class__(**new_config)
                 model=replace_intermediate_layer_in_keras(model,i,new_layer)'''
-    # model=reload_model(model)
+    model=reload_model(model)
     return model
 
 def not_dense_acti(model,i):
@@ -230,18 +230,18 @@ def modify_activations(model,activation_name,method='normal'):#https://github.co
                         i+=1
                         layers_num+=1
             i+=1
-        model.summary()
-    reload_sign=False
+        # model.summary()
+    # reload_sign=False
     for i in range(len(model.layers)):
         for j in range(len(model.layers[i].get_weights())):
             if has_NaN(model.layers[i].get_weights()[j]):
-                reload_sign=True
+                # reload_sign=True
                 new_config=copy.deepcopy(model.layers[i].get_config())
                 new_layer=model.layers[i].__class__(**new_config)
                 model=replace_intermediate_layer_in_keras(model,i,new_layer)
                 break
-    if reload_sign:
-        model=reload_model(model)
+    # if reload_sign:
+    model=reload_model(model)
     return model
 
 # model=load_model('/data/zxy/DL_tools/1Autokeras/test_codes/relu/b5e3c487/model.h5')
@@ -287,7 +287,7 @@ def Dropout_network(model,incert_layer=Insert_Layers,rate=0.25):
                         i=layers_num
                     layers_num+=1
         i+=1
-    model.summary()
+    # model.summary()
     model=reload_model(model)
     return model
 
@@ -303,7 +303,7 @@ def BN_network(model,incert_layer=Insert_Layers):
                     layers_num+=1
         i+=1
         # break
-    model.summary()
+    # model.summary()
     model=reload_model(model)
     return model
 
@@ -412,39 +412,40 @@ def select_loss(model,cur_loss):
     # classify_loss_list=['binary_crossentropy','categorical_crossentropy']
     
         
-    if model.output_shape[-1]!=1 and cur_loss!='categorical_crossentropy':
+    if model.output_shape[-1]>2 and cur_loss!='categorical_crossentropy':
         cur_loss='categorical_crossentropy'
-    elif model.output_shape[-1]==1 and cur_loss!='binary_crossentropy':
+    elif model.output_shape[-1]<=2 and cur_loss!='binary_crossentropy':
         cur_loss='binary_crossentropy'
     elif 'entro' in cur_loss:
         cur_loss=np.random.choice(regression_loss,1)[0]
     return cur_loss
 
-def preprocess(data_array):
-    from sklearn.preprocessing import MinMaxScaler
-    scaler=MinMaxScaler()
-    data_array=scaler.fit_transform(data_array.reshape(-1, data_array.shape[-1])).reshape(data_array.shape)
-    # data_array = data_array.astype('float32')
-    # mean = [125.307, 122.95, 113.865]
-    # std = [62.9932, 62.0887, 66.7048]
-    # for i in range(3):
-    #     data_array_2[:, :, :, i] = (data_array[:, :, :, i] - mean[i]) / std[i]
-    # data_array /= 255
-    
+def preprocess(data_array, method='default'):
+    if method=='cifar10':
+        data_array = data_array.astype('float32')/100
+        mean = [125.307, 122.95, 113.865]
+        std = [62.9932, 62.0887, 66.7048]
+        for i in range(3):
+            data_array[:, :, :, i] = (data_array[:, :, :, i] - mean[i]) / std[i]
+    else:
+        from sklearn.preprocessing import MinMaxScaler
+        scaler=MinMaxScaler()
+        data_array=scaler.fit_transform(data_array.reshape(-1, data_array.shape[-1])).reshape(data_array.shape)
+
     return data_array
 
 def reconstruct_model(model):
-    reload_sign=False
+    # reload_sign=False
     for i in range(len(model.layers)):
         for j in range(len(model.layers[i].get_weights())):
             if has_NaN(model.layers[i].get_weights()[j]):
-                reload_sign=True
+                # reload_sign=True
                 new_config=copy.deepcopy(model.layers[i].get_config())
                 new_layer=model.layers[i].__class__(**new_config)
                 model=replace_intermediate_layer_in_keras(model,i,new_layer)
                 break
-    if reload_sign:
-        model=reload_model(model)
+    # if reload_sign:
+    model=reload_model(model)
     return model
 
 ##------------------------add solution describe here-----------------------------
@@ -454,7 +455,7 @@ def op_loss(model, config, issue, j,config_set):
     new_loss=select_loss(model,config['loss'])
     config['loss']=new_loss
     config_set['loss']=new_loss
-    model=reconstruct_model(model)
+    # model=reconstruct_model(model)
     return model, config,describe, False,config_set
 
 def op_activation(model, config, issue, j,config_set):
@@ -463,15 +464,16 @@ def op_activation(model, config, issue, j,config_set):
     if activation_name=='sigmoid' and 'entropy' not in config['loss']:
         activation_name='linear' # for regression problem
     model = modify_last_activations(model, activation_name)
-    model=reconstruct_model(model)
+    # model=reconstruct_model(model)
     return model, config,describe, False,config_set
 
 def op_preprocess(model, config, issue, j,config_set):
     describe=0
     data_set=config['dataset']
-    data_set['x']=preprocess(data_set['x'])
-    data_set['x_val']=preprocess(data_set['x_val'])
-    model=reconstruct_model(model)
+    method=config_set['dataset'].split('-')[0]
+    data_set['x']=preprocess(data_set['x'],method)
+    data_set['x_val']=preprocess(data_set['x_val'],method)
+    # model=reconstruct_model(model)
     return model, config,describe, False,config_set
 
 def op_gradient(model, config, issue, j,config_set):  #m

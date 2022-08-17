@@ -38,3 +38,8 @@ Thumbs.db
 
 *.h5
 *tmp*
+*_rnn*
+*.vscode*
+*Data_Issue_case*
+*Loss_Issue_Case*
+*demo_test.py
