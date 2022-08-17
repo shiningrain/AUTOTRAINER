@@ -17,6 +17,7 @@ Automatic detecting and fixing DNN training problem at run time.
     - demo_case/  
         - Gradient_Vanish_Case/
         - Oscillating_Loss_Case/
+        - Improper_Activation_case/
     - utils/         
     - reproduce.py             
     - README.md                  
@@ -24,7 +25,7 @@ Automatic detecting and fixing DNN training problem at run time.
     - DyingReLU/
     - OscillatingLoss/
     - README.md
-- Rebuttal/
+- Supplement_data/
 - README.md
 - requirements.txt
 ```
@@ -45,7 +46,7 @@ $ python demo.py
 ## Results
 
 ### Effectiveness
-![avatar](https://github.com/shiningrain/tmpfigure/blob/master/ICSE21/Figure3.png)
+![avatar](https://github.com/shiningrain/tmpfigure/blob/master/TDSC/Figure3.png)
 
 To evaluate the effectiveness of AUTOTRAINER, we run **495** collected model training scripts to test the effectiveness of AUTOTRAINER. From these models, AUTOTRAINER has detected **262** buggy models and **316** training problems. 
 Then AUTORTRAINER tries the candidate solutions and repairs **255** models buggy models, the repaired rate reaches **97.33%**. 
