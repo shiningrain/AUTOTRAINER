@@ -52,7 +52,7 @@ $ python demo.py
 To evaluate the effectiveness of AUTOTRAINER, we run **701** collected model training scripts to test the effectiveness of AUTOTRAINER. From these models, AUTOTRAINER has detected **422** buggy models and **506** training problems. 
 Then AUTORTRAINER tries the candidate solutions and repairs **414** models buggy models, the repaired rate reaches **98.42%**. 
 
-Additionally, the model accuracy improvement distribution of the 255 repaired buggy models is shown in the above figure. The average accuracy improvement reaches **36.42%**.
+Additionally, the model accuracy improvement distribution of the 414 repaired buggy models is shown in the above figure. The average accuracy improvement reaches **36.42%**.
 Specifically, over **133** models get an increase of 50% and over 50%. The maximum improvement reaches **90.17%**
 
 
