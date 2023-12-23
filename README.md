@@ -4,6 +4,12 @@
 
 Automatic detecting and fixing DNN training problems at run time.
 
+## For Revision
+
+Thanks to the editor and the reviewers for their thorough work in evaluating our manuscript, and their thoughtful comments that contribute significantly to its improvement. We have now revised the paper in compliance with the comments by the editor and the reviewers.
+We have updated the experiment results [here](./Supplement_data/All_models_detail.csv).
+
+
 ## Repo Structure
 
 1. AutoTrainer: It mainly contains the source codes of the AUTOTRAINER (the folder `data` and `utils`), two demo cases. You can find a easy start [here](./AutoTrainer/README.md). The way to run the demo cases has been shown [here](#Demo).
