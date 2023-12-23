@@ -7,7 +7,8 @@ Automatic detecting and fixing DNN training problems at run time.
 ## For Revision
 
 Thanks to the editor and the reviewers for their thorough work in evaluating our manuscript, and their thoughtful comments that contribute significantly to its improvement. We have now revised the paper in compliance with the comments by the editor and the reviewers.
-We have updated the experiment results [here](./Supplement_data/All_models_detail.csv).
+We have updated the experiment results with precision and recall metrics [here](./Supplement_data/All_models_detail.csv).
+We will continue to improve our tools to facilitate the community.
 
 
 ## Repo Structure
